@@ -1,64 +1,50 @@
 services:
-  # Chat interface, provided by OpenWebUI
+  # Chat interface
   openwebui:
     image: ghcr.io/open-webui/open-webui:main
     ports:
       - "3000:8080"
+    environment:
+      - OPENAI_API_BASE_URL=http://vllm:8000/v1
+      - OPENAI_API_KEY=EMPTY
     volumes:
       - open-webui:/app/backend/data
-
-  # LLM server, provided by vLLM
+    depends_on:
+      vllm:
+        condition: service_healthy
+  # LLM server
   vllm:
     image: vllm/vllm-openai:latest
     ipc: host
     environment:
       VLLM_MODEL: ${VLLM_MODEL}
-      VLLM_PORT: ${VLLM_PORT}
-      VLLM_HOST: ${VLLM_HOST}
-      VLLM_GPU_PERCENTAGE: ${VLLM_GPU_PERCENTAGE}
       VLLM_LOGGING_LEVEL: ${VLLM_LOGGING_LEVEL}
     ports:
+      # Maps Host Port (11435) to Container Port (8000)
       - "${VLLM_PORT}:8000"
     command:
       [
-        "--host",
-        "${VLLM_HOST}",
-        "--port",
-        "8000",
-        "--gpu-memory-utilization",
-        "${VLLM_GPU_PERCENTAGE}",
-        "--model",
         "${VLLM_MODEL}",
+        "--host", "${VLLM_HOST}",
+        "--port", "8000",
+        "--gpu-memory-utilization", "${VLLM_GPU_PERCENTAGE}",
+        "--max-model-len", "${VLLM_MAX_MODEL_LEN}"
       ]
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${VLLM_HOST}:8000/health/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 20s
       timeout: 10s
       retries: 3
-      start_period: 20s
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-
-  # LLM server, provided by Ollama
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama:/root/.ollama
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+      start_period: 40s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 volumes:
   open-webui:
-  ollama:
