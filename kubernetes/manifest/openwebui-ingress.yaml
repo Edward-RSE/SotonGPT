@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openwebui-ingress
+  namespace: sotongpt
+spec:
+  rules:
+    - host: sotongpt.minikube.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openwebui-service
+                port:
+                  number: 8080

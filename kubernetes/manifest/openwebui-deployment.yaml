@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui-deployment
+  namespace: sotongpt
+  labels:
+    app: openwebui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openwebui
+  template:
+    metadata:
+      labels:
+        app: openwebui
+    spec:
+      containers:
+        - name: openwebui
+          image: ghcr.io/open-webui/open-webui:main
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "500Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          env:
+            - name: OLLAMA_BASE_URL
+              value: "http://ollama-service:11434"
+          tty: true
+          volumeMounts:
+            - name: openwebui-volume
+              mountPath: /app/backend/data
+      volumes:
+        - name: openwebui-volume
+          persistentVolumeClaim:
+            claimName: openwebui-pvc
