@@ -5,7 +5,7 @@ metadata:
   namespace: sotongpt
 spec:
   rules:
-    - host: sotongpt.minikube.local
+    - host: chat-dev.soton.ac.uk
       http:
         paths:
           - path: /
