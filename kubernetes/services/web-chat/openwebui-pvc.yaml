@@ -3,10 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: openwebui-pvc
   namespace: sotongpt
-  labels:
-    app: openwebui
 spec:
-  accessModes: ["ReadWriteOnce"]
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 2Gi
+      storage: 10Gi

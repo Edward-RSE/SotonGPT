@@ -5,3 +5,6 @@ resources:
   - openwebui-ingress.yaml
   - openwebui-pvc.yaml
   - openwebui-service.yaml
+  - openwebui-pv.yaml
+  - openwebui-storage-class.yaml
+
