@@ -7,4 +7,3 @@ resources:
   - openwebui-service.yaml
   - openwebui-pv.yaml
   - openwebui-storage-class.yaml
-
