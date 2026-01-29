@@ -68,7 +68,15 @@ K3s thankfully supports managing GPU resources. However, there is some leg work 
 3. Install the NVIDIA device plugin for K8s
 4. Set the default container runtime for K3s to the NVIDIA container runtime
 
-#### GPU drivers and container runtime
+The first steps should be install the latest stable graphics drivers and the NVIDIA container runtime. In most systems,
+drivers can be installed through the package manager:
+
+```bash
+sudo apt install nvidia-driver-590
+```
+
+To install the container runtime, we have to add the NVIDIA repositories to the package manager (this assumes you have
+Curl and GPG installed):
 
 ```bash
 $ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -78,20 +86,64 @@ $ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --de
     && sudo apt update
 ```
 
+Now we can install the packages required:
+
 ```bash
 $ export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.18.2-1
-$ sudo apt-get install -y \
+$ sudo apt install -y \
       nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
       nvidia-container-toolkit-base=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
       libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
-      libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+      libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      nvidia-container-runtime
 ```
 
-## Deployment guide
+Once this is installed, restart the K3s service. If everything has gone to plan, K3s will automatically add the NVIDIA
+container runtime to the containerd configuration. This can be confirmed by grep'ing for nvidia in the K3s containerd
+configuration file:
+
+```bash
+sudo systemctl restart k3s && grep nvidia /var/lib/rancher/k3s/agent/etc/containerd/config.toml
+```
+
+The final two steps are to installed the NVIDIA device plugin for K8s and set the NVIDIA container runtime as the
+default runtime. To install the plugin, run the following command:
+
+```bash
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.17.1/deployments/static/nvidia-device-plugin.yml
+```
+
+Confirmation installation by looking at the kube-system pods:
+
+```bash
+$ kubectl get pods -n kube-system | grep nvidia
+nvidia-device-plugin-daemonset-r5f8h      1/1     Running     2 (63m ago)   28h
+```
+
+Finally, we can check that the GPUs have been found by K3s by running the following, which will print the nodes in the
+K3s cluster and the number of available GPUs on the node:
+
+```bash
+$ kubectl get nodes "-o=custom-columns=NAME:.metadata.name,GPU:.status.allocatable.nvidia\.com/gpu"
+NAME   GPU
+r3x    1
+```
+
+You may optionally also wish to configure the NVIDIA container runtime to be the default container. To do this, we need
+to modify the K3s service definition to add an additional argument. Add `--default-runtime nvidia` to `ExecStart` in
+`/etc/systemd/system/k3s.service`:
+
+```service
+...
+ExecStart=/usr/local/bin/k3s \
+   server --default-runtime nvidia \
+```
+
+## How to deploy SotonGPT
 
 SotonGPT can be deployed using Kubernetes
 
-```
+```bash
 kubectl apply -k .
 ```
 
