@@ -6,10 +6,10 @@ The main reasons for this are:
 1. Scalability: K8s will let us scale resources vertically and horizontally automatically as demand for the system
    grows. Whilst this is possible with a Docker Compose project, it isn't automated to the same degree especially with
    container replication and load balancing.
-2. Resillience: K8s takes care of health checks and restarting failed/stuck containers automatically.
+2. Resilience: K8s takes care of health checks and restarting failed/stuck containers automatically.
 3. Future growth: The architecture can be extended to support additional services, replicas, or nodes without requiring
    a redesign of the deployment approach.
-4. Operational advatnages: Built-in logging, metrics, and health probes means monitoring and debugging SotonGPT should
+4. Operational advantages: Built-in logging, metrics, and health probes means monitoring and debugging SotonGPT should
    be easier.
 
 We'll be using [K3s](https://k3s.io/) to create the K8s cluster. K3s is a certified Kubernetes distribution designed for
@@ -17,13 +17,17 @@ production deployments in resource-constrained, remote locations or inside IoT a
 it creates a lightweight K8s cluster (K3s is a single <70MB binary) so we can dedicate as much resource as possible to
 OpenWebUI and the vLLM containers.
 
+## Architecture
+
+TODO
+
 ## Installing and configuring K3s
 
 You can follow the installation [quick-start guide](https://docs.k3s.io/quick-start) and other installation
 instrunctions to install K3s. However, installation can also be handled by a one-liner to use the default configuration:
 
 ```bash
-$ curl -sfL https://get.k3s.io | sh -
+curl -sfL https://get.k3s.io | sh -
 ```
 
 This will install K3s and configure a K3s service which will automatically restart on reboots. It also installs all the
@@ -139,15 +143,45 @@ ExecStart=/usr/local/bin/k3s \
    server --default-runtime nvidia \
 ```
 
-## How to deploy SotonGPT
+## Deploying SotonGPT to K3s
 
-SotonGPT can be deployed using Kubernetes
+To deploy SotonGPT, clone the git repository and navigate into the directory:
 
 ```bash
-kubectl apply -k .
+git clone git@github.com:Edward-RSE/SotonGPT.git && cd SotonGPT
 ```
 
-OpenWebUI is served to chat-dev.soton.ac.uk. Need to update /etc/hosts to be able
+Assuming all is OK with your K3s installation, as you should need to do use `kubectl` to apply the SotonGPT manifests to
+the cluster:
+
+```bash
+kubectl apply -k kubernetes/
+```
+
+This will create a namespace `sotongpt`. Check that the pods have been deployed, as well as the persistent volumes
+claims:
+
+```bash
+$ kubectl get pods -n sotongpt
+NAME                                    READY   STATUS    RESTARTS   AGE
+openwebui-deployment-646f76d7d5-lxw59   1/1     Running   0          6s
+vllm-server-6c78b6877c-hqthv            0/1     Pending   0          6s
+$ kubectl get pvc -n sotongpt
+NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+openwebui-pvc   Bound    openwebui-pv                               64Gi       RWO            manual         <unset>                 111s
+vllm-server     Bound    pvc-0635d727-a4f6-45dd-958a-9751e182e0d5   64Gi       RWO            hostpath       <unset>                 111s
+```
+
+If you see a status of anything other than "Running", you can check the event history of the pod using `kubectl describe
+pod -n sotongpt <pod-name>`. If the vLLM pod is stuck in pending, it's possible that K3s has been unable to allocate the
+requested resources to the pod. This usually happens when a spare GPU cannot be found on the node.
+
+### Development
+
+The OpenWebUI interface for a development deployment can be reached at the url
+[http://chat-dev.soton.ac.uk](http://chat-dev.soton.ac.uk). K3s will take care of redirecting requests and load
+balancing using Traefik. However, you will need to update the `/etc/hosts` file on your system for a local deployment,
+to direct the URL to the IP address of the worker running the OpenWebUI pod. In K3s, you can find the address using:
 to access it, e.g. for k3s find the IP for the node:
 
 ```bash
@@ -156,8 +190,8 @@ NAME   STATUS   ROLES           AGE    VERSION        INTERNAL-IP    EXTERNAL-IP
 r3x    Ready    control-plane   100m   v1.34.3+k3s1   192.168.0.40   <none>        Ubuntu 24.04.3 LTS   6.14.0-37-generic   containerd://2.1.5-k3s1
 ```
 
-Then modify /etc/hosts with the INTERNAL-IP value,
+Then modify `/etc/hosts` with the INTERNAL-IP value:
 
-```
+```text
 192.168.0.40 chat-dev.soton.ac.uk
 ```
