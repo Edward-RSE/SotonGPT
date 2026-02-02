@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-server
+  name: vllm-deployment
   namespace: sotongpt
   labels:
-    app: vllm-server
+    app: vllm-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-server
+      app: vllm-deployment
   template:
     metadata:
       labels:
-        app: vllm-server
+        app: vllm-deployment
     spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: vllm-server
+            claimName: vllm-deployment
         - name: shm
           emptyDir:
             medium: Memory
