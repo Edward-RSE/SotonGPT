@@ -199,7 +199,7 @@ If you see a status of anything other than "Running", you can check the event hi
 pod -n sotongpt <pod-name>`. If the vLLM pod is stuck in pending, it's possible that K3s has been unable to allocate the
 requested resources to the pod. This usually happens when a spare GPU cannot be found on the node.
 
-### Development
+### Development on Linux
 
 The OpenWebUI interface for a development deployment can be reached at the url
 [http://chat-dev.soton.ac.uk](http://chat-dev.soton.ac.uk). K3s will take care of redirecting requests and load
@@ -218,3 +218,15 @@ Then modify `/etc/hosts` with the INTERNAL-IP value:
 ```text
 192.168.0.40 chat-dev.soton.ac.uk
 ```
+
+### Development on macOS for non-LLM server related services
+
+K3s is not available on macOS. You will need to either use Minikube (which doesn't work that magnificently either) or
+use something like Docker Desktop which uses Kubeadm to create a single node cluster. As there is no NVIDIA GPU support
+on macOS, you will also have to use an overlay to launch an Ollama server instead of vLLM.
+
+```bash
+kubectl apply -k overlays/ollama-dev
+```
+
+Since this uses Ollama instead, you cannot develop the vLLM service on macOS.
