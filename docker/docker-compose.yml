@@ -1,3 +1,4 @@
+name: SotonGPT
 services:
   # Chat interface
   openwebui:
