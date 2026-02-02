@@ -18,14 +18,14 @@ spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: vllm-deployment
+            claimName: vllm-pvc
         - name: shm
           emptyDir:
             medium: Memory
             sizeLimit: 8Gi
       containers:
         - name: vllm
-          image: vllm/vllm-openai:latest
+          image: vllm/vllm-openai:v0.14.1
           args:
             - Qwen/Qwen3-0.6B
             - --host
