@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: vllm-pvc
+  name: qwen3-0.6b
   namespace: sotongpt
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 64Gi
+      storage: 50Gi
+  volumeMode: Filesystem
