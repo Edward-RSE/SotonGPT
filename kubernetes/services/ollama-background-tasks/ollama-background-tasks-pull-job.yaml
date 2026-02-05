@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-model-loader
+  namespace: sotongpt
+spec:
+  template:
+    spec:
+      containers:
+      - name: ollama-model-loader
+        image: curlimages/curl:latest
+        command:
+        - sh
+        - -c
+        - |
+          until curl -f http://ollama-background-tasks:11434/api/version; do
+            echo "Waiting for Ollama..."
+            sleep 5
+          done
+
+          curl -X POST http://ollama-background-tasks:11434/api/pull \
+            -H "Content-Type: application/json" \
+            -d '{"name": "gemma3:1b-it-qat"}'
+      restartPolicy: OnFailure
+  backoffLimit: 3

@@ -3,3 +3,6 @@ kind: Kustomization
 resources:
   - ollama-background-tasks-deployment.yaml
   - ollama-background-tasks-service.yaml
+  - ollama-background-tasks-pv.yaml
+  - ollama-background-tasks-pvc.yaml
+  - ollama-background-tasks-pull-job.yaml
