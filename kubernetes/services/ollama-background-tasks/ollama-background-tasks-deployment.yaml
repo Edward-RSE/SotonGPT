@@ -27,3 +27,10 @@ spec:
             limits:
               cpu: 2
               memory: 4Gi
+          volumeMounts:
+            - name: ollama-background-tasks-storage
+              mountPath: /root/.ollama
+      volumes:
+        - name: ollama-background-tasks-storage
+          persistentVolumeClaim:
+            claimName: ollama-background-tasks-pvc
