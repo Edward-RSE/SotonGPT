@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: vllm-qwen3-0.6b
+  name: vllm-qwen3-0-6b
   namespace: sotongpt
 spec:
   ports:
-    - name: vllm-qwen3-0.6b
+    - name: vllm-qwen3-06b
       port: 80
       protocol: TCP
       targetPort: 8000
