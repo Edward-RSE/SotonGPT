@@ -1,41 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-gemma3-deployment
+  name: vllm-qwen3-14b-deployment
   namespace: sotongpt
   labels:
-    app: vllm-gemma3-deployment
+    app: vllm-qwen3-14b-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-gemma3-deployment
+      app: vllm-qwen3-14b-deployment
   template:
     metadata:
       labels:
-        app: vllm-gemma3-deployment
+        app: vllm-qwen3-14b-deployment
     spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: gemma3-27b
+            claimName: qwen3-14b
         - name: shm
           emptyDir:
             medium: Memory
-            sizeLimit: 8Gi
+            sizeLimit: 16Gi
       containers:
         - name: vllm
           image: vllm/vllm-openai:v0.14.1
           args:
-            - google/gemma-3-27b-it
+            - Qwen/Qwen3-14B
             - --host
             - 0.0.0.0
             - --port
             - "8000"
             - --gpu-memory-utilization
-            - "0.95"
-            - --max-model-len
-            - "128000"
+            - "0.90"
           ports:
             - containerPort: 8000
           env:
@@ -59,19 +57,19 @@ spec:
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 180
             periodSeconds: 10
-            failureThreshold: 10
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 180
             periodSeconds: 5
-            failureThreshold: 10
+            failureThreshold: 3
+          # let's the container have 15 minutes to launch before k8s tries to
+          # say that it's broken/not launching
           startupProbe:
             httpGet:
               path: /health
               port: 8000
-            failureThreshold: 60
             periodSeconds: 5
+            failureThreshold: 180

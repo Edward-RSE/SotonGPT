@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: qwen3-0.6b
+  name: qwen3-14b
   namespace: sotongpt
 spec:
   accessModes:
