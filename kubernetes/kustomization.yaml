@@ -4,7 +4,7 @@ resources:
 - base/
 - services/ollama-background-tasks
 - services/vllm-qwen3-14b
-- services/vllm-gpt-oss-20b
+- services/vllm-mistral-8x7b-instruct
 - services/vllm-qwen3-0.6b
 - services/web-chat
 labels:
