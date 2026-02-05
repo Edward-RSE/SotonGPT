@@ -5,6 +5,7 @@ resources:
 - services/ollama-background-tasks
 - services/vllm-qwen3-14b
 - services/vllm-gpt-oss-20b
+- services/vllm-qwen3-0.6b
 - services/web-chat
 labels:
 - includeSelectors: true
