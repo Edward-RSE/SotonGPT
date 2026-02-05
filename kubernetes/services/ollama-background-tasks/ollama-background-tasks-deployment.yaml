@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama-deployment
+  name: ollama-background-tasks-deployment
   namespace: sotongpt
   labels:
-    app: ollama
+    app: ollama-background-tasks
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ollama
+      app: ollama-background-tasks
   template:
     metadata:
       labels:
-        app: ollama
+        app: ollama-background-tasks
     spec:
       containers:
         - name: ollama
@@ -22,8 +22,8 @@ spec:
             - containerPort: 11434
           resources:
             requests:
-              cpu: 2
+              cpu: 1
               memory: 2Gi
             limits:
-              cpu: 4
-              memory: 16Gi
+              cpu: 2
+              memory: 4Gi
