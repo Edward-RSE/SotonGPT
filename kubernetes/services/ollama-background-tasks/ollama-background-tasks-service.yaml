@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ollama-service
+  name: ollama-background-tasks
   namespace: sotongpt
 spec:
   selector:
-    app: ollama
+    app: ollama-background-tasks
   ports:
     - protocol: TCP
       port: 11434

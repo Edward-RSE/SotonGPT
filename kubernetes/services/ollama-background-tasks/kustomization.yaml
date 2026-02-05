@@ -1,0 +1,5 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ollama-background-tasks-deployment.yaml
+  - ollama-background-tasks-service.yaml
