@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-deepseek-r1-qwen-32b-deployment
+  namespace: sotongpt
+  labels:
+    app: vllm-deepseek-r1-qwen-32b-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-deepseek-r1-qwen-32b-deployment
+  template:
+    metadata:
+      labels:
+        app: vllm-deepseek-r1-qwen-32b-deployment
+    spec:
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: deepseek-r1-qwen-32b
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Gi
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.14.1
+          args:
+            - deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "8000"
+            - --gpu-memory-utilization
+            - "0.95"
+            - --tensor-parallel-size
+            - "2"
+            - --enforce-eager
+            - --enable-chunked-prefill
+            - --dtype
+            - float16
+            - --max-model-len
+            - "100000"
+          ports:
+            - containerPort: 8000
+          env:
+            - name: VLLM_LOGGING_LEVEL
+              value: INFO
+          resources:
+            limits:
+              cpu: "4"
+              memory: 12Gi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: "2"
+              memory: 6Gi
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /root/.cache/huggingface
+            - name: shm
+              mountPath: /dev/shm
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 5
+            failureThreshold: 3
+          # let's the container have 15 minutes to launch before k8s tries to
+          # say that it's broken/not launching
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 5
+            failureThreshold: 180
