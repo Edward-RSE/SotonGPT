@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - base/
 - services/ollama-background-tasks
+- services/vllm-gemma3-27b
 - services/vllm-qwen3
 - services/web-chat
 labels:
