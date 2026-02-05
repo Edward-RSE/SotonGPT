@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-gemma3-deployment
+  namespace: sotongpt
+  labels:
+    app: vllm-gemma3-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-gemma3-deployment
+  template:
+    metadata:
+      labels:
+        app: vllm-gemma3-deployment
+    spec:
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: gemma3-27b
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 8Gi
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.14.1
+          args:
+            - google/gemma-3-27b-it
+            - --host
+            - 0.0.0.0
+            - --port
+            - "8000"
+            - --gpu-memory-utilization
+            - "0.95"
+            - --max-model-len
+            - "128000"
+          ports:
+            - containerPort: 8000
+          env:
+            - name: VLLM_LOGGING_LEVEL
+              value: INFO
+          resources:
+            limits:
+              cpu: "4"
+              memory: 12Gi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: "2"
+              memory: 6Gi
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /root/.cache/huggingface
+            - name: shm
+              mountPath: /dev/shm
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 180
+            periodSeconds: 5
+            failureThreshold: 10
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            failureThreshold: 60
+            periodSeconds: 5
