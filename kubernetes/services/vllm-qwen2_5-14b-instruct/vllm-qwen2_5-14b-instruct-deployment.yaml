@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-qwen2_5-14b-instruct-deployment
+  name: vllm-qwen2-5-14b-instruct-deployment
   namespace: sotongpt
   labels:
-    app: vllm-qwen2_5-14b-instruct-deployment
+    app: vllm-qwen2-5-14b-instruct-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-qwen2_5-14b-instruct-deployment
+      app: vllm-qwen2-5-14b-instruct-deployment
   template:
     metadata:
       labels:
-        app: vllm-qwen2_5-14b-instruct-deployment
+        app: vllm-qwen2-5-14b-instruct-deployment
     spec:
       volumes:
         - name: cache-volume
