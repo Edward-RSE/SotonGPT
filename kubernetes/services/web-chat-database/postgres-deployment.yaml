@@ -43,7 +43,7 @@ spec:
               memory: 1Gi
             limits:
               cpu: 2
-              memory: 4Gi
+              memory: 24Gi
       volumes:
         - name: postgresdata
           persistentVolumeClaim:

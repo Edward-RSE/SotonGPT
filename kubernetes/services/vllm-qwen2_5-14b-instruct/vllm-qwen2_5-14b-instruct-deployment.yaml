@@ -41,8 +41,8 @@ spec:
               value: INFO
           resources:
             limits:
-              cpu: "4"
-              memory: 12Gi
+              cpu: "6"
+              memory: 50Gi
               nvidia.com/gpu: "1"
             requests:
               cpu: "2"
