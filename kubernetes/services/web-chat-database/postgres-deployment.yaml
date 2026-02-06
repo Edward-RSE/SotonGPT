@@ -1,29 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openwebui-deployment
+  name: postgres
   namespace: sotongpt
-  labels:
-    app: openwebui
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: openwebui
+      app: postgres
   template:
     metadata:
       labels:
-        app: openwebui
+        app: postgres
     spec:
-      initContainers:
-        - name: wait-for-postgres
-          image: busybox
-          command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting; sleep 2; done;']
       containers:
-        - name: openwebui
-          image: ghcr.io/open-webui/open-webui:main
+        - name: postgres
+          image: pgvector/pgvector:pg17
           ports:
-            - containerPort: 8080
+            - containerPort: 5432
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -40,23 +34,17 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
-            - name: DATABASE_URL
-              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)
-            - name: VECTOR_DB
-              value: pgvector
-            - name: DATABASE_ENABLE_SESSION_SHARING
-              value: "True"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
           resources:
             requests:
               cpu: 1
               memory: 1Gi
             limits:
-              cpu: 4
+              cpu: 2
               memory: 4Gi
-          volumeMounts:
-            - name: openwebui-storage
-              mountPath: /app/backend/data
       volumes:
-        - name: openwebui-storage
+        - name: postgresdata
           persistentVolumeClaim:
-            claimName: openwebui-pvc
+            claimName: postgres-pvc
