@@ -22,11 +22,11 @@ spec:
             - containerPort: 11434
           resources:
             requests:
-              cpu: 1
-              memory: 2Gi
-            limits:
-              cpu: 2
+              cpu: 4
               memory: 4Gi
+            limits:
+              cpu: 6
+              memory: 8Gi
           volumeMounts:
             - name: ollama-background-tasks-storage
               mountPath: /root/.ollama

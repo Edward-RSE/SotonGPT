@@ -20,6 +20,6 @@ spec:
 
           curl -X POST http://ollama-background-tasks:11434/api/pull \
             -H "Content-Type: application/json" \
-            -d '{"name": "gemma3:1b-it-qat"}'
+            -d '{"name": "gemma3:1b"}'
       restartPolicy: OnFailure
   backoffLimit: 3
