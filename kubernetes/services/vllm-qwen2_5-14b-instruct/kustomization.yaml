@@ -1,6 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - vllm-qwen3-14b-deployment.yaml
-  - vllm-qwen3-14b-pvc.yaml
-  - vllm-qwen3-14b-service.yaml
+  - vllm-qwen2_5-14b-instruct-deployment.yaml
+  - vllm-qwen2_5-14b-instruct-pvc.yaml
+  - vllm-qwen2_5-14b-instruct-service.yaml
