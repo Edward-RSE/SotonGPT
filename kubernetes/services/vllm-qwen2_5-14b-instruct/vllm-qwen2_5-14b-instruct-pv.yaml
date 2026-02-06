@@ -4,6 +4,9 @@ metadata:
   name: qwen2-5-14b-instruct-pv
 spec:
   storageClassName: manual
+  claimRef:
+    name: qwen2-5-14b-instruct
+    namespace: sotongpt
   capacity:
     storage: 64Gi
   accessModes:
