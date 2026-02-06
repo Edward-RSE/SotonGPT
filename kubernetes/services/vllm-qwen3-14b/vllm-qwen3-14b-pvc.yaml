@@ -4,9 +4,9 @@ metadata:
   name: qwen3-14b
   namespace: sotongpt
 spec:
+  storageClassName: manual
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 50Gi
-  volumeMode: Filesystem
+      storage: 64Gi
