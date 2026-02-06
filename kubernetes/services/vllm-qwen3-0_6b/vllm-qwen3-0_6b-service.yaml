@@ -11,6 +11,6 @@ spec:
       targetPort: 8000
   # The label selector should match the deployment labels & it is useful for prefix caching feature
   selector:
-    app: vllm-qwen3-0.6b-deployment
+    app: vllm-qwen3-0-6b-deployment
   sessionAffinity: None
   type: ClusterIP

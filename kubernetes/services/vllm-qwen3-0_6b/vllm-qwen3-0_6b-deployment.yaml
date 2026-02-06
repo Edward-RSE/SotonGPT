@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-qwen3-0.6b-deployment
+  name: vllm-qwen3-0-6b-deployment
   namespace: sotongpt
   labels:
-    app: vllm-qwen3-0.6b-deployment
+    app: vllm-qwen3-0-6b-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-qwen3-0.6b-deployment
+      app: vllm-qwen3-0-6b-deployment
   template:
     metadata:
       labels:
-        app: vllm-qwen3-0.6b-deployment
+        app: vllm-qwen3-0-6b-deployment
     spec:
       volumes:
         - name: cache-volume
