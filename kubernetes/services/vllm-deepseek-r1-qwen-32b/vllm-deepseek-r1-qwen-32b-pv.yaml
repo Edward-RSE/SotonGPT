@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: deepseek-r1-qwen-32b-pv
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 64Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/ejp1v21/opt/vllm/deepseek-r1-qwen-32b
+    type: DirectoryOrCreate

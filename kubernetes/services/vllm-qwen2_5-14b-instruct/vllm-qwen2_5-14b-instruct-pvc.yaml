@@ -4,9 +4,9 @@ metadata:
   name: qwen2-5-14b-instruct
   namespace: sotongpt
 spec:
+  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 50Gi
-  volumeMode: Filesystem
+      storage: 64Gi
