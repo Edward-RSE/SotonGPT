@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /home/ejp1v21/opt/vllm/deepseek-r1-qwen-32b
+    path: /home/ejp1v21/opt/sotongpt/vllm/deepseek-r1-qwen-32b
     type: DirectoryOrCreate

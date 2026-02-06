@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /home/ejp1v21/opt/vllm/qwen2-5-14b-instruct
+    path: /home/ejp1v21/opt/sotongpt/vllm/qwen2-5-14b-instruct
     type: DirectoryOrCreate
