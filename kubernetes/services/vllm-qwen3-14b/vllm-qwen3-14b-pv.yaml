@@ -4,6 +4,9 @@ metadata:
   name: vllm-qwen3-14b-pv
 spec:
   storageClassName: manual
+  claimRef:
+    name: qwen3-14b
+    namespace: sotongpt
   capacity:
     storage: 64Gi
   accessModes:

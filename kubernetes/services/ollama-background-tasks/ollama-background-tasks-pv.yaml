@@ -4,6 +4,9 @@ metadata:
   name: ollama-background-tasks-pv
 spec:
   storageClassName: manual
+  claimRef:
+    name: ollama-background-tasks-pvc
+    namespace: sotongpt
   capacity:
     storage: 10Gi
   accessModes:

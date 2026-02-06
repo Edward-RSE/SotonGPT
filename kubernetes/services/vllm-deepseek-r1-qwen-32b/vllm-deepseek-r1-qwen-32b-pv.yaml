@@ -4,6 +4,9 @@ metadata:
   name: deepseek-r1-qwen-32b-pv
 spec:
   storageClassName: manual
+  claimRef:
+    name: deepseek-r1-qwen-32b
+    namespace: sotongpt
   capacity:
     storage: 64Gi
   accessModes:

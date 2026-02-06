@@ -4,8 +4,11 @@ metadata:
   name: openwebui-pv
 spec:
   storageClassName: manual
+  claimRef:
+    name: openwebui-pvc
+    namespace: sotongpt
   capacity:
-    storage: 64Gi
+    storage: 32Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
