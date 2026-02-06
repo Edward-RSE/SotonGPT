@@ -3,9 +3,9 @@ kind: Kustomization
 resources:
 - base/
 - services/ollama-background-tasks
-# - sercvices/vllm-deepseek-r1-qwen-32b
-# - services/vllm-qwen3-0.6b
-# - services/vllm-qwen3-14b
+- sercvices/vllm-deepseek-r1-qwen-32b
+- services/vllm-qwen3-0.6b
+- services/vllm-qwen3-14b
 - services/web-chat
 - services/web-chat-database
 labels:
