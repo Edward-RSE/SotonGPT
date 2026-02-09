@@ -51,8 +51,8 @@ spec:
               cpu: 1
               memory: 1Gi
             limits:
-              cpu: 6
-              memory: 32Gi
+              cpu: 4
+              memory: 8Gi
           volumeMounts:
             - name: openwebui-storage
               mountPath: /app/backend/data
