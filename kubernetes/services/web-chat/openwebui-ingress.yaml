@@ -5,7 +5,7 @@ metadata:
   namespace: sotongpt
 spec:
   rules:
-    - host: chat.soton.ac.uk
+    - host: sotongpt.soton.ac.uk
       http:
         paths:
           - path: /
@@ -14,4 +14,4 @@ spec:
               service:
                 name: openwebui-service
                 port:
-                  number: 8080
+                  name: http
