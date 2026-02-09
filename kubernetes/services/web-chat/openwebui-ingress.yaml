@@ -14,4 +14,4 @@ spec:
               service:
                 name: openwebui-service
                 port:
-                  name: http
+                  number: 8080
