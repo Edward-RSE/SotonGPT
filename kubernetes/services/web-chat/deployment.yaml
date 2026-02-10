@@ -18,7 +18,12 @@ spec:
       initContainers:
         - name: wait-for-postgres
           image: busybox
-          command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting; sleep 2; done;']
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z postgres-service 5432; do echo waiting; sleep 2; done;",
+            ]
       containers:
         - name: openwebui
           image: ghcr.io/open-webui/open-webui:main
