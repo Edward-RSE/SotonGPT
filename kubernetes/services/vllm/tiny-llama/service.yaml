@@ -1,16 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: vllm-qwen3-0-6b
+  name: tiny-llama-service
   namespace: sotongpt
 spec:
   ports:
-    - name: vllm-qwen3-06b
+    - name: tiny-llama
       port: 80
       protocol: TCP
       targetPort: 8000
-  # The label selector should match the deployment labels & it is useful for prefix caching feature
   selector:
-    app: vllm-qwen3-0-6b-deployment
+    app: tiny-llama-deployment
   sessionAffinity: None
   type: ClusterIP
