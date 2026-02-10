@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-qwen3-0-6b-deployment
+  name: tiny-llama-deployment
   namespace: sotongpt
   labels:
-    app: vllm-qwen3-0-6b-deployment
+    app: tiny-llama-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-qwen3-0-6b-deployment
+      app: tiny-llama-deployment
   template:
     metadata:
       labels:
-        app: vllm-qwen3-0-6b-deployment
+        app: tiny-llama-deployment
     spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: qwen3-0-6b
+            claimName: tiny-llama
         - name: shm
           emptyDir:
             medium: Memory
@@ -27,11 +27,19 @@ spec:
         - name: vllm
           image: vllm/vllm-openai:v0.14.1
           args:
-            - Qwen/Qwen3-0.6B
+            - TinyLlama/TinyLlama-1.1B-Chat-v1.0
             - --host
             - 0.0.0.0
             - --port
             - "8000"
+            - --gpu-memory-utilization
+            - "0.6"
+            - --max-model-len
+            - "1024"
+            - --max-num-seqs
+            - "1"
+            - --dtype
+            - float16
           ports:
             - containerPort: 8000
           env:
@@ -39,12 +47,12 @@ spec:
               value: INFO
           resources:
             limits:
-              cpu: "4"
-              memory: 12Gi
+              cpu: "6"
+              memory: 16Gi
               nvidia.com/gpu: "1"
             requests:
-              cpu: "6"
-              memory: 50Gi
+              cpu: "4"
+              memory: 8Gi
               nvidia.com/gpu: "1"
           volumeMounts:
             - name: cache-volume

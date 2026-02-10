@@ -18,7 +18,12 @@ spec:
       initContainers:
         - name: wait-for-postgres
           image: busybox
-          command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting; sleep 2; done;']
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z postgres-service 5432; do echo waiting; sleep 2; done;",
+            ]
       containers:
         - name: openwebui
           image: ghcr.io/open-webui/open-webui:main
@@ -46,6 +51,8 @@ spec:
               value: pgvector
             - name: DATABASE_ENABLE_SESSION_SHARING
               value: "True"
+            - name: CORS_ALLOW_ORIGIN
+              value: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
           resources:
             requests:
               cpu: 1
