@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-qwen3-32b-deployment
+  namespace: sotongpt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-qwen3-32b-deployment
+  template:
+    metadata:
+      labels:
+        app: vllm-qwen3-32b-deployment
+    spec:
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: qwen3-32b-pvc
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Gi
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:v0.14.1
+          args:
+            - Qwen/Qwen3-32B
+            - --tensor-parallel-size
+            - "2"
+            - --gpu-memory-utilization
+            - "0.85"
+            - --host
+            - 0.0.0.0
+            - --port
+            - "8000"
+          ports:
+            - containerPort: 8000
+          env:
+            - name: VLLM_LOGGING_LEVEL
+              value: INFO
+          resources:
+            limits:
+              nvidia.com/gpu: "2"
+              cpu: "8"
+              memory: 96Gi
+            requests:
+              nvidia.com/gpu: "2"
+              cpu: "4"
+              memory: 32Gi
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /root/.cache/huggingface
+            - name: shm
+              mountPath: /dev/shm
