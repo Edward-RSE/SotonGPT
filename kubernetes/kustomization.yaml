@@ -5,6 +5,7 @@ resources:
 - services/web-chat
 - services/web-chat-database
 - services/ollama-background-tasks
+- services/vllm/secrets/secret.yaml
 labels:
 - includeSelectors: true
   pairs:
