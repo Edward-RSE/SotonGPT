@@ -51,6 +51,8 @@ spec:
               value: pgvector
             - name: DATABASE_ENABLE_SESSION_SHARING
               value: "True"
+            - name: CORS_ALLOW_ORIGIN
+              value: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
           resources:
             requests:
               cpu: 1
