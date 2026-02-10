@@ -53,3 +53,23 @@ spec:
               mountPath: /root/.cache/huggingface
             - name: shm
               mountPath: /dev/shm
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 5
+            failureThreshold: 3
+          # let's the container have 15 minutes to launch before k8s tries to
+          # say that it's broken/not launching
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 5
+            failureThreshold: 180
