@@ -5,8 +5,6 @@ resources:
 - services/web-chat
 - services/web-chat-database
 - services/ollama-background-tasks
-- services/vllm/qwen2_5-14b-instruct
-- services/vllm/deepseek-r1-qwen-32b
 labels:
 - includeSelectors: true
   pairs:
