@@ -1,0 +1,19 @@
+grafana:
+  adminUser: admin
+  adminPassword: ""
+  ingress:
+    enabled: true
+    hosts:
+      - dashboard.sotongpt.soton.ac.uk
+    path: /
+    pathType: Prefix
+    ingressClassName: traefik
+  service:
+    type: ClusterIP
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+alertmanager:
+  enabled: true
