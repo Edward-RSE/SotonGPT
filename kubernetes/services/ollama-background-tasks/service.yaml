@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: ollama-background-tasks
   namespace: sotongpt
+  labels:
+    app: ollama
 spec:
   selector:
     app: ollama-background-tasks

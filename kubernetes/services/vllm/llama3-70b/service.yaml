@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: vllm-llama3-70b
   namespace: sotongpt
+  labels:
+    app: vllm
 spec:
   ports:
-    - name: vllm-llama3-70b
+    - name: http
       port: 80
       protocol: TCP
       targetPort: 8000
