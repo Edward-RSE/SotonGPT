@@ -34,6 +34,10 @@ spec:
             - 0.0.0.0
             - --port
             - "8000"
+            - --reasoning-parser
+            - qwen3
+            - --default-chat-template-kwarg
+            - '{"enable_thinking": false}'
           ports:
             - containerPort: 8000
           env:
