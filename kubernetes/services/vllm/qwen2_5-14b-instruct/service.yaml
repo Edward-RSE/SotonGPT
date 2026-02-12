@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: vllm-qwen2-5-14b-instruct
   namespace: sotongpt
+  labels:
+    app: vllm
 spec:
   ports:
-    - name: vllm-qwen2-5-14b-instruct
+    - name: http
       port: 80
       protocol: TCP
       targetPort: 8000

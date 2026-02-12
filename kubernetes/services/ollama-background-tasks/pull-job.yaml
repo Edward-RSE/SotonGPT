@@ -21,5 +21,9 @@ spec:
           curl -X POST http://ollama-background-tasks:11434/api/pull \
             -H "Content-Type: application/json" \
             -d '{"name": "gemma3:1b"}'
+
+          curl -X POST http://ollama-background-tasks:11434/api/pull \
+            -H "Content-Type: application/json" \
+            -d '{"name": "nomic-embed-text"}'
       restartPolicy: OnFailure
   backoffLimit: 3

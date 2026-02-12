@@ -53,6 +53,14 @@ spec:
               value: "True"
             - name: CORS_ALLOW_ORIGIN
               value: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
+            - name: ENABLE_REALTIME_CHAT_SAVE
+              value: "False"
+            - name: CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE
+              value: "7"
+            - name: THREAD_POOL_SIZE
+              value: "2000"
+            - name: MODELS_CACHE_TTL
+              value: "300"
           resources:
             requests:
               cpu: 1

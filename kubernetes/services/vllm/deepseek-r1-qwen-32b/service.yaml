@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: vllm-deepseek-r1-qwen-32b
   namespace: sotongpt
+  labels:
+    app: vllm
 spec:
   ports:
-    - name: vllm-deepseek-r1-qwen-32b
+    - name: http
       port: 80
       protocol: TCP
       targetPort: 8000
