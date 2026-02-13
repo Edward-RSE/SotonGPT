@@ -42,7 +42,7 @@ OpenWebUI and the vLLM containers.
 
 ## Architecture
 
-TODO
+More details about the K8s architecture can be found in [kubernetes/README.md](kuberenetes/README.md).
 
 ## Installing and configuring K3s
 
