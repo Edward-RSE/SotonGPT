@@ -1,59 +1,67 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-qwen3-32b-deployment
+  name: vllm-qwen2-5-7b-instruct-deployment
   namespace: sotongpt
+  labels:
+    app: vllm-qwen2-5-7b-instruct-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vllm-qwen3-32b-deployment
+      app: vllm-qwen2-5-7b-instruct-deployment
   template:
     metadata:
       labels:
-        app: vllm-qwen3-32b-deployment
+        app: vllm-qwen2-5-7b-instruct-deployment
     spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: qwen3-32b-pvc
+            claimName: qwen2-5-7b-instruct-pvc
         - name: shm
           emptyDir:
             medium: Memory
-            sizeLimit: 16Gi
+            sizeLimit: 8Gi
       containers:
         - name: vllm
           image: vllm/vllm-openai:v0.14.1
           args:
-            - Qwen/Qwen3-32B
-            - --tensor-parallel-size
-            - "2"
+            - --model
+            - Qwen/Qwen2.5-7B-Instruct-AWQ
+            - --max-model-len
+            - "65536"
             - --gpu-memory-utilization
-            - "0.85"
-            - --host
-            - 0.0.0.0
+            - "0.90"
+            - --dtype
+            - auto
+            - --tensor-parallel-size
+            - "1"
+            - --max-num-batched-tokens
+            - "8192"
+            - --max-num-seqs
+            - "96"
+            - --enable-chunked-prefill
             - --port
             - "8000"
-            - --reasoning-parser
-            - qwen3
-            # - --default-chat-template-kwarg
-            # - '{"enable_thinking": false}'
-            - --max-num-batched-tokens
-            - "4096"
+            - --host
+            - 0.0.0.0
           ports:
             - containerPort: 8000
           env:
             - name: VLLM_LOGGING_LEVEL
               value: INFO
+            - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+              value: "1"
           resources:
             limits:
-              nvidia.com/gpu: "2"
+              nvidia.com/gpu: "1"
               cpu: "8"
-              memory: 96Gi
+              memory: 64Gi
             requests:
-              nvidia.com/gpu: "2"
+              nvidia.com/gpu: "1"
               cpu: "4"
-              memory: 32Gi
+              memory: 24Gi
           volumeMounts:
             - name: cache-volume
               mountPath: /root/.cache/huggingface

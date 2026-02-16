@@ -30,6 +30,10 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: ENV
+              value: "prod"
+            - name: ENABLE_EASTER_EGGS
+              value: "False"
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
