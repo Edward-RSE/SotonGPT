@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /opt/sotongpt/openwebui-data
+    path: /opt/sotongpt-data/openwebui-data
     type: DirectoryOrCreate

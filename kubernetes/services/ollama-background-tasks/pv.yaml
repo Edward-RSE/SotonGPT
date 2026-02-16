@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /opt/sotongpt/ollama-background-tasks
+    path: /opt/sotongpt-data/ollama-background-tasks
     type: DirectoryOrCreate
