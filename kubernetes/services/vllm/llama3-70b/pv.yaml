@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /home/ejp1v21/opt/sotongpt/vllm/llama3-70b
+    path: /home/ejp1v21/sotongpt-models/vllm/llama3-70b
     type: DirectoryOrCreate

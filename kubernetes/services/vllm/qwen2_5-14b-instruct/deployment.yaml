@@ -34,6 +34,8 @@ spec:
             - "8000"
             - --gpu-memory-utilization
             - "0.90"
+            - --max-num-batched-tokens
+            - "2048"
           ports:
             - containerPort: 8000
           env:
@@ -41,13 +43,13 @@ spec:
               value: INFO
           resources:
             limits:
-              cpu: "6"
-              memory: 50Gi
               nvidia.com/gpu: "1"
+              cpu: "8"
+              memory: 96Gi
             requests:
-              cpu: "2"
-              memory: 6Gi
               nvidia.com/gpu: "1"
+              cpu: "4"
+              memory: 32Gi
           volumeMounts:
             - name: cache-volume
               mountPath: /root/.cache/huggingface

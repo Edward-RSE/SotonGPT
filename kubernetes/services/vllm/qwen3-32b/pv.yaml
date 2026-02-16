@@ -12,5 +12,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /home/ejp1v21/opt/sotongpt/vllm/qwen3-32b
+    path: /home/ejp1v21/sotongpt-models/vllm/qwen3-32b
     type: DirectoryOrCreate
