@@ -10,7 +10,7 @@ import requests
 from locust import HttpUser, between, task
 
 SOTONGPT_TOKEN_USER = os.getenv(
-    "SOTONGPT_TOKEN_USER", "sk-d6c203c1c53f43eb91892627a028ac9a"
+    "SOTONGPT_TOKEN_USER", ""
 )
 REQUEST_HEADERS = {"Authorization": f"Bearer {SOTONGPT_TOKEN_USER}"}
 
@@ -25,7 +25,7 @@ class APIUser(HttpUser):
     MAX_TIMEOUT = 300
 
     def on_start(self) -> None:
-        self.models = ("qwen3-32b", "qwen25-14b-instruct", "tiny-llama")
+        self.models = ("qwen3-32b", "qwen25-14b-instruct", "qwen25-7b-instruct")
 
     # ============================================================================
     # Helper Methods - File Operations
