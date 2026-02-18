@@ -5,8 +5,8 @@ both Docker and Kubernetes.
 
 ## Deploying SotonGPT with Docker
 
-An early and experimental version of SotonGPT can be deployed using Docker. **This is not the supported method of
-deployment for SotonGPT.**
+An early and experimental version of SotonGPT can be deployed using Docker. **This is not the supported, or correct,
+method of deployment for SotonGPT.**
 
 First download the repository and navigate into it:
 
@@ -42,7 +42,8 @@ OpenWebUI and the vLLM containers.
 
 ## Architecture
 
-More details about the K8s architecture can be found in [kubernetes/README.md](kuberenetes/README.md).
+More details about the K8s architecture can be found in
+[kubernetes/README.md](https://github.com/Edward-RSE/SotonGPT/blob/main/kubernetes/README.md).
 
 ## Installing and configuring K3s
 
@@ -181,52 +182,42 @@ the cluster:
 kubectl apply -k kubernetes/
 ```
 
-This will create a namespace `sotongpt`. Check that the pods have been deployed, as well as the persistent volumes
-claims:
+This will create a namespace `sotongpt`. You can check that the pods have been deployed and have started up correctly
+by using:
 
 ```bash
 $ kubectl get pods -n sotongpt
 NAME                                    READY   STATUS    RESTARTS   AGE
-openwebui-deployment-646f76d7d5-lxw59   1/1     Running   0          6s
-vllm-server-6c78b6877c-hqthv            0/1     Pending   0          6s
-$ kubectl get pvc -n sotongpt
-NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
-openwebui-pvc   Bound    openwebui-pv                               64Gi       RWO            manual         <unset>                 111s
-vllm-server     Bound    pvc-0635d727-a4f6-45dd-958a-9751e182e0d5   64Gi       RWO            hostpath       <unset>                 111s
+NAME                                                    READY   STATUS                     RESTARTS        AGE
+ollama-background-tasks-deployment-545c5c57dc-w8hq5     1/1     Running                    1 (5h38m ago)   2d
+ollama-model-loader-5mqsq                               0/1     Completed                  0               2d
+openwebui-deployment-76bcf8f9c7-9z7h9                   1/1     Running                    1 (5h35m ago)   2d
+postgres-deployment-7c47858d5f-48pmw                    1/1     Running                    1 (5h38m ago)   2d
+vllm-qwen2-5-14b-instruct-deployment-5ccb868dc6-lbwb6   1/1     Running                    0               5h34m
+vllm-qwen2-5-7b-instruct-deployment-667b4d9f75-mh9nt    1/1     Running                    0               5h34m
+vllm-qwen3-32b-deployment-cbd6c4d77-vsz89               1/1     Running                    0               5h34m
 ```
 
 If you see a status of anything other than "Running", you can check the event history of the pod using `kubectl describe
 pod -n sotongpt <pod-name>`. If the vLLM pod is stuck in pending, it's possible that K3s has been unable to allocate the
-requested resources to the pod. This usually happens when a spare GPU cannot be found on the node.
+requested resources to the pod. This usually happens when a spare GPU cannot be found on the node, of if a persistent
+volume has not been configured correctly.
 
-### Development on Linux
+## Monitoring of vLLM and the K3s cluster
 
-The OpenWebUI interface for a development deployment can be reached at the url
-[http://chat-dev.soton.ac.uk](http://chat-dev.soton.ac.uk). K3s will take care of redirecting requests and load
-balancing using Traefik. However, you will need to update the `/etc/hosts` file on your system for a local deployment,
-to direct the URL to the IP address of the worker running the OpenWebUI pod. In K3s, you can find the address using:
-to access it, e.g. for k3s find the IP for the node:
+To monitor the status of both the K3s cluster and the metrics of the vLLM servers, we use the kube-prometheus stack with
+a Grafana dashboard. This can be deployed using a script in monitoring directory,
 
 ```bash
-$ kubectl get nodes -o wide
-NAME   STATUS   ROLES           AGE    VERSION        INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
-r3x    Ready    control-plane   100m   v1.34.3+k3s1   192.168.0.40   <none>        Ubuntu 24.04.3 LTS   6.14.0-37-generic   containerd://2.1.5-k3s1
+cd kubernetes/monitoring && ./helm-deploy.sh
 ```
 
-Then modify `/etc/hosts` with the INTERNAL-IP value:
-
-```text
-192.168.0.40 chat-dev.soton.ac.uk
-```
-
-### Development on macOS for non-LLM server related services
-
-K3s is not available on macOS. You will need to either use Minikube (which doesn't work that magnificently either) or
-use something like Docker Desktop which uses Kubeadm to create a single node cluster. As there is no NVIDIA GPU support
-on macOS, you will also have to use an overlay to launch an Ollama server instead of vLLM.
+To enable monitoring the metrics API endpoints of the vLLM servers, we need to configure a K8s Service Monitor:
 
 ```bash
-kubectl apply -k overlays/ollama-dev
+cd kubernetes/monitoring && kubectl apply -f service-monitor-vllm.yaml
 ```
 
-Since this uses Ollama instead, you cannot develop the vLLM service on macOS.
+This Service Monitor will target any service with the label `app: vllm` and create a Grafana dashboard showing metrics
+such as the token throughput and E2E latency. If there is no vLLM dashboard, you will need to import it manually using
+the [pre-made JSON template](https://grafana.com/grafana/dashboards/23991-vllm/).
