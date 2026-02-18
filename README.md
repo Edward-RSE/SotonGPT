@@ -221,3 +221,9 @@ cd kubernetes/monitoring && kubectl apply -f service-monitor-vllm.yaml
 This Service Monitor will target any service with the label `app: vllm` and create a Grafana dashboard showing metrics
 such as the token throughput and E2E latency. If there is no vLLM dashboard, you will need to import it manually using
 the [pre-made JSON template](https://grafana.com/grafana/dashboards/23991-vllm/).
+
+## Load testing the deployment
+
+We have provided a script using [Locust](https://locust.io/) which can be used to load test the SotonGPT deployment.
+This script will send requests to the chat completions endpoint to the available models, including sending requests to
+the file uploads endpoint and using the file in the chat completion.
