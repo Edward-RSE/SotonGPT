@@ -182,8 +182,14 @@ the cluster:
 kubectl apply -k kubernetes/
 ```
 
-This will create a namespace `sotongpt`. You can check that the pods have been deployed and have started up correctly
-by using:
+This will create a namespace `sotongpt` and deploy the base services: Open WebUI, Postgres and Ollama. To deploy an LLM
+server, apply one of the models in the vLLM service directory:
+
+```bash
+kubectl apply -k kubernetes/vllm/qwen2_5-14b-instruct
+```
+
+You can check that the pods have been deployed and have started up correctly by using:
 
 ```bash
 $ kubectl get pods -n sotongpt
@@ -194,8 +200,6 @@ ollama-model-loader-5mqsq                               0/1     Completed       
 openwebui-deployment-76bcf8f9c7-9z7h9                   1/1     Running                    1 (5h35m ago)   2d
 postgres-deployment-7c47858d5f-48pmw                    1/1     Running                    1 (5h38m ago)   2d
 vllm-qwen2-5-14b-instruct-deployment-5ccb868dc6-lbwb6   1/1     Running                    0               5h34m
-vllm-qwen2-5-7b-instruct-deployment-667b4d9f75-mh9nt    1/1     Running                    0               5h34m
-vllm-qwen3-32b-deployment-cbd6c4d77-vsz89               1/1     Running                    0               5h34m
 ```
 
 If you see a status of anything other than "Running", you can check the event history of the pod using `kubectl describe
@@ -236,8 +240,8 @@ SotonGPT uses [Open WebUI](https://openwebui.com/) to serve an interactive chat 
 multiple API endpoints for more technical users. The API allows direct communication with the LLMs bypassing the chat
 window, and acts as a centralised model hub with a consistent interface between Ollama and vLLM servers. SotonGPT uses
 v0.8.3 of Open WebUI. The pod exposes port 8080, forwarded to port 80 via the ingress at
-[http://sotongpt.soton.ac.uk](http://sotongpt.soton.ac.uk). Environment variables for performance are documented in
-`deployment.yaml`. Only 1 replica of Open WebUI is run. If required, Open WebUI can run multiple replicas with Redis,
+[http://sotongpt.soton.ac.uk](http://sotongpt.soton.ac.uk). Environment variables for performance are documented in the
+deployment manifest. Only 1 replica of Open WebUI is run. If required, Open WebUI can run multiple replicas with Redis,
 see [here](https://docs.openwebui.com/troubleshooting/multi-replica/) for more details.
 
 #### PostgreSQL database
