@@ -207,6 +207,8 @@ pod -n sotongpt <pod-name>`. If the vLLM pod is stuck in pending, it's possible 
 requested resources to the pod. This usually happens when a spare GPU cannot be found on the node, of if a persistent
 volume has not been configured correctly.
 
+You can then access SotonGPT at [http://sotongpt.soton.ac.uk](http://sotongpt.soton.ac.uk).
+
 ## Monitoring of vLLM and the K3s cluster
 
 To monitor the status of both the K3s cluster and the metrics of the vLLM servers, we use the kube-prometheus stack with
@@ -225,6 +227,9 @@ cd kubernetes/monitoring && kubectl apply -f service-monitor-vllm.yaml
 This Service Monitor will target any service with the label `app: vllm` and create a Grafana dashboard showing metrics
 such as the token throughput and E2E latency. If there is no vLLM dashboard, you will need to import it manually using
 the [pre-made JSON template](https://grafana.com/grafana/dashboards/23991-vllm/).
+
+The dashboard has been configured to be accessible at
+[http://dashboard.sotongpt.soton.ac.uk](http://dashboard.sotongpt.soton.ac.uk).
 
 ## Load testing the deployment
 
