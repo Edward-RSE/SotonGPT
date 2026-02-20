@@ -22,7 +22,8 @@ The deployment is organised into three main directories:
     └── web-chat-database          # PostgreSQL database with pgvector for Open WebUI
 ```
 
-The `base` and `monitoring` directories contain infrastructure-related manifests for cluster setup and observability. The `services` directory houses the core application components.
+The `base` and `monitoring` directories contain infrastructure-related manifests for cluster setup and observability.
+The `services` directory houses the core application components.
 
 ## Deployment diagram
 
@@ -30,7 +31,9 @@ The `base` and `monitoring` directories contain infrastructure-related manifests
 
 ## Open WebUI
 
-SotonGPT uses [Open WebUI](https://openwebui.com/) to serve an interactive chat for non-technical users, and also serves multiple API endpoints for more technical users. The API allows direct communication with the LLMs bypassing the chat window, and acts as a centralised model hub with a consistent interface between Ollama and vLLM servers.
+SotonGPT uses [Open WebUI](https://openwebui.com/) to serve an interactive chat for non-technical users, and also serves
+multiple API endpoints for more technical users. The API allows direct communication with the LLMs bypassing the chat
+window, and acts as a centralised model hub with a consistent interface between Ollama and vLLM servers.
 
 The manifests to deploy Open WebUI are kept in the `services/web-chat` directory:
 
