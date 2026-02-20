@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-valkey-deployment
+  namespace: redis-valkey
+  labels:
+    app: redis-valkey
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-valkey
+  template:
+    metadata:
+      labels:
+        app: redis-valkey
+    spec:
+      containers:
+        - name: redis-valkey
+          image: valkey/valkey:8.0.3-alpine
+          ports:
+            - name: redis-valkey
+              containerPort: 6379
+          volumeMounts:
+            - name: lv-storage
+              mountPath: /data
+          env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+      volumes:
+        - name: lv-storage
+          persistentVolumeClaim:
+            claimName: redis-valkey-pvc
