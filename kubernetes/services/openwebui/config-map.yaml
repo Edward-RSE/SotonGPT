@@ -6,85 +6,34 @@ metadata:
   labels:
     app: openwebui
 data:
-  # Secret key, need to set this to coordinate replicas and muiltiple workers
-  - name: WEBUI_SECRET_KEY
-    valueFrom:
-      secretKeyRef:
-        name: openwebui-secret
-        key: WEBUI_SECRET_KEY
   # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
-  - name: UVICORN_WORKERS
-    value: 4
+  UVICORN_WORKERS: "4"
   # Set thread pool size for AnyIO blocking calls. If too low, the web page will
   # become unresponsive. Guide value is UVICORN_WORKERS * 40, but may need to be
   # higher
-  - name: THREAD_POOL_SIZE
-    value: "160"
+  THREAD_POOL_SIZE: "160"
   # Enabling redis websocket required for running replicas
-  - name: ENABLE_WEBSOCKET_SUPPORT
-    value: "True"
-  - name: WEBSOCKET_MANAGER
-    value: redis
-  - name: REDIS_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: openwebui-secret
-        key: REDIS_PASSWORD
-  - name: REDIS_URL
-    value: redis://:$(REDIS_PASSWORD)@redis-valkey-service.redis-valkey.svc.cluster.local:6379/0
+  ENABLE_WEBSOCKET_SUPPORT: "True"
+  WEBSOCKET_MANAGER: "redis"
   # Enable production environment, which hides the swagger docs
-  - name: ENV
-    value: "prod"
-  - name: ENABLE_EASTER_EGGS
-    value: "False"
-  # Configure database connection
-  - name: POSTGRES_USER
-    valueFrom:
-      configMapKeyRef:
-        name: postgres-config
-        key: POSTGRES_USER
-  - name: POSTGRES_DB
-    valueFrom:
-      configMapKeyRef:
-        name: postgres-config
-        key: POSTGRES_DB
-  - name: POSTGRES_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: postgres-secret
-        key: POSTGRES_PASSWORD
-  # Points to psql database
-  - name: DATABASE_URL
-    value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)
+  ENV: "prod"
+  ENABLE_EASTER_EGGS: "False"
   # Use pgvector for embeddings storage
-  - name: VECTOR_DB
-    value: pgvector
+  VECTOR_DB: "pgvector"
   # Improves performance of workers sharing database sessions
-  - name: DATABASE_ENABLE_SESSION_SHARING
-    value: "True"
-  - name: CORS_ALLOW_ORIGIN
-    value: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
+  DATABASE_ENABLE_SESSION_SHARING: "True"
+  CORS_ALLOW_ORIGIN: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
   # Improves performance by only saving a complete response and by caching various parts of the chat workflow
-  - name: ENABLE_REALTIME_CHAT_SAVE
-    value: "False"
-  - name: ENABLE_QUERIES_CACHE
-    value: "True"
-  - name: CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE
-    value: "7"
+  ENABLE_REALTIME_CHAT_SAVE: "False"
+  ENABLE_QUERIES_CACHE: "True"
+  CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE: "7"
   # Higher values increase the time-to-live of a model, reducing API calls to LLMs
-  - name: MODELS_CACHE_TTL
-    value: "120"
+  MODELS_CACHE_TTL: "120"
   # The number of open connections to the database, both need to be kept under 100 when added together
-  - name: DATABASE_POOL_SIZE
-    value: "15"
-  - name: DATABASE_POOL_MAX_OVERFLOW
-    value: "20"
+  DATABASE_POOL_SIZE: "15"
+  DATABASE_POOL_MAX_OVERFLOW: "20"
   # Disabling features which will not be used
-  - name: ENABLE_AUTOCOMPLETE_GENERATION
-    value: "False"
-  - name: ENABLE_FOLLOW_UP_GENERATION
-    value: "False"
-  - name: ENABLE_IMAGE_GENERATION
-    value: "False"
-  - name: ENABLE_CODE_INTERPRETER
-    value: "False"
+  ENABLE_AUTOCOMPLETE_GENERATION: "False"
+  ENABLE_FOLLOW_UP_GENERATION: "False"
+  ENABLE_IMAGE_GENERATION: "False"
+  ENABLE_CODE_INTERPRETER: "False"

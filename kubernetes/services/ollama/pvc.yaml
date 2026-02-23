@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ollama-background-tasks-pvc
+  name: ollama-pvc
   namespace: sotongpt
 spec:
   storageClassName: manual

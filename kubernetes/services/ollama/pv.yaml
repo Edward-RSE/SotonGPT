@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: ollama-background-tasks-pv
+  name: ollama-pv
 spec:
   storageClassName: manual
   claimRef:
-    name: ollama-background-tasks-pvc
+    name: ollama-pvc
     namespace: sotongpt
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /opt/sotongpt-data/ollama-background-tasks
+    path: /opt/sotongpt-data/ollama
     type: DirectoryOrCreate
