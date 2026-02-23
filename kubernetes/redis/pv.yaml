@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: openwebui-pv
+  name: redis-valkey-pv
 spec:
   storageClassName: manual
   claimRef:
-    name: openwebui-pvc
-    namespace: sotongpt
+    name: redis-valkey-pvc
+    namespace: redis-valkey
   capacity:
-    storage: 32Gi
+    storage: 5Gi
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
-    path: /opt/sotongpt-data/openwebui-data
+    path: /opt/sotongpt-data/redis-valkey
     type: DirectoryOrCreate
