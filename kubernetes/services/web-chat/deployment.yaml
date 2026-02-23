@@ -6,7 +6,7 @@ metadata:
   labels:
     app: openwebui
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: openwebui
@@ -31,6 +31,24 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            # Secret key, need to set this to coordinate replicas
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: WEBUI_SECRET_KEY
+            # Enabling redis websocket required for running replicas
+            - name: ENABLE_WEBSOCKET_SUPPORT
+              value: "True"
+            - name: WEBSOCKET_MANAGER
+              value: redis
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: REDIS_PASSWORD
+            - name: REDIS_URL
+              value: redis://:$(REDIS_PASSWORD)@redis-valkey-service.redis-valkey.svc.cluster.local:6379/0
             # Enable production environment, which hides the swagger docs
             - name: ENV
               value: "prod"
@@ -66,8 +84,6 @@ spec:
             # Improves performance by only saving a complete response and by caching various parts of the chat workflow
             - name: ENABLE_REALTIME_CHAT_SAVE
               value: "False"
-            - name: ENABLE_QUERIES_CACHE
-              value: "True"
             - name: ENABLE_QUERIES_CACHE
               value: "True"
             - name: CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE
