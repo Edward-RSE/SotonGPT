@@ -35,6 +35,8 @@ spec:
                 name: redis-secret
             - secretRef:
                 name: openwebui-secret
+            - secretRef:
+                name: hf-token-secret
             - configMapRef:
                 name: openwebui-config
           # The env variables in here use references to secrets and other config maps
@@ -57,7 +59,7 @@ spec:
                   name: redis-secret
                   key: REDIS_PASSWORD
             - name: REDIS_URL
-              value: redis://:$(REDIS_PASSWORD)@redis-valkey-service.redis-valkey.svc.cluster.local:6379/0
+              value: redis://:$(REDIS_PASSWORD)@redis-valkey-service:6379/0
             # Configure postgres database connection
             - name: POSTGRES_USER
               valueFrom:
