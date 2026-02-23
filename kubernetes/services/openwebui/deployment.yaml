@@ -32,14 +32,50 @@ spec:
             - containerPort: 8080
           envFrom:
             - secretRef:
-              name: redis-secret
+                name: redis-secret
             - secretRef:
-              name: openwebui-secret
+                name: openwebui-secret
             - configMapRef:
-              name: openwebui-config
+                name: openwebui-config
+          # The env variables in here use references to secrets and other config maps
+          # so have to be here. Additional env variables are in the openwebui config
+          # map
           env:
+            # Secret key, need to set this to coordinate replicas and muiltiple workers
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: WEBUI_SECRET_KEY
+            # Migrations should only be enabled on one replica
             - name: ENABLE_DB_MIGRATIONS
               value: "True"
+            # Configure Redis connection
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
+            - name: REDIS_URL
+              value: redis://:$(REDIS_PASSWORD)@redis-valkey-service.redis-valkey.svc.cluster.local:6379/0
+            # Configure postgres database connection
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)
           resources:
             requests:
               cpu: 4

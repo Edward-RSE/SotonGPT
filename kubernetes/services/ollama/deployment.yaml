@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama-background-tasks-deployment
+  name: ollama-deployment
   namespace: sotongpt
   labels:
-    app: ollama-background-tasks
+    app: ollama
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ollama-background-tasks
+      app: ollama
   template:
     metadata:
       labels:
-        app: ollama-background-tasks
+        app: ollama
     spec:
       containers:
         - name: ollama
@@ -28,9 +28,9 @@ spec:
               cpu: 6
               memory: 8Gi
           volumeMounts:
-            - name: ollama-background-tasks-storage
+            - name: ollama-storage
               mountPath: /root/.ollama
       volumes:
-        - name: ollama-background-tasks-storage
+        - name: ollama-storage
           persistentVolumeClaim:
-            claimName: ollama-background-tasks-pvc
+            claimName: ollama-pvc
