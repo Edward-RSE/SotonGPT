@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-valkey-deployment
-  namespace: redis-valkey
+  namespace: sotongpt
   labels:
     app: redis-valkey
 spec:

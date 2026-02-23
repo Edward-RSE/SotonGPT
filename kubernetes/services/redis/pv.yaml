@@ -6,7 +6,7 @@ spec:
   storageClassName: manual
   claimRef:
     name: redis-valkey-pvc
-    namespace: redis-valkey
+    namespace: sotongpt
   capacity:
     storage: 5Gi
   accessModes:
