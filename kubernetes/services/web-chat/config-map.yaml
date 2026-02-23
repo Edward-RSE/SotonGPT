@@ -6,12 +6,20 @@ metadata:
   labels:
     app: openwebui
 data:
-  # Secret key, need to set this to coordinate replicas
+  # Secret key, need to set this to coordinate replicas and muiltiple workers
   - name: WEBUI_SECRET_KEY
     valueFrom:
       secretKeyRef:
         name: openwebui-secret
         key: WEBUI_SECRET_KEY
+  # The number of separate worker processes per pod, should be <= num CPUs
+  - name: UVICORN_WORKERS
+    value: 4
+  # Set thread pool size for AnyIO blocking calls. If too low, the web page will
+  # become unresponsive. Guide value is UVICORN_WORKERS * 40, but may need to be
+  # higher
+  - name: THREAD_POOL_SIZE
+    value: "160"
   # Enabling redis websocket required for running replicas
   - name: ENABLE_WEBSOCKET_SUPPORT
     value: "True"
@@ -63,9 +71,6 @@ data:
     value: "True"
   - name: CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE
     value: "7"
-  # Set thread pool size for AnyIO blocking calls. If too low, the web page will become unresponsive
-  - name: THREAD_POOL_SIZE
-    value: "2000"
   # Higher values increase the time-to-live of a model, reducing API calls to LLMs
   - name: MODELS_CACHE_TTL
     value: "120"
