@@ -18,7 +18,7 @@ spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: qwen2-5-14b-instruct
+            claimName: qwen2-5-14b-instruct-pvc
         - name: shm
           emptyDir:
             medium: Memory
