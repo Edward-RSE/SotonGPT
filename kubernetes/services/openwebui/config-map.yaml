@@ -12,7 +12,7 @@ data:
       secretKeyRef:
         name: openwebui-secret
         key: WEBUI_SECRET_KEY
-  # The number of separate worker processes per pod, should be <= num CPUs
+  # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
   - name: UVICORN_WORKERS
     value: 4
   # Set thread pool size for AnyIO blocking calls. If too low, the web page will

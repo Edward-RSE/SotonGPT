@@ -2,11 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - base
-- redis
-- services/web-chat
-- services/web-chat-database
-- services/ollama-background-tasks
-- services/vllm/secrets/secret.yaml
+- services/redis
+- services/openwebui
+- services/postgres
+- services/ollama
+- services/vllm/secrets.yaml
 labels:
 - includeSelectors: true
   pairs:
