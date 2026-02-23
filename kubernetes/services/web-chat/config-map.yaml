@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openwebui-config
+  namespace: sotongpt
+  labels:
+    app: openwebui
+data:
+  # Secret key, need to set this to coordinate replicas
+  - name: WEBUI_SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: openwebui-secret
+        key: WEBUI_SECRET_KEY
+  # Enabling redis websocket required for running replicas
+  - name: ENABLE_WEBSOCKET_SUPPORT
+    value: "True"
+  - name: WEBSOCKET_MANAGER
+    value: redis
+  - name: REDIS_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: openwebui-secret
+        key: REDIS_PASSWORD
+  - name: REDIS_URL
+    value: redis://:$(REDIS_PASSWORD)@redis-valkey-service.redis-valkey.svc.cluster.local:6379/0
+  # Enable production environment, which hides the swagger docs
+  - name: ENV
+    value: "prod"
+  - name: ENABLE_EASTER_EGGS
+    value: "False"
+  # Configure database connection
+  - name: POSTGRES_USER
+    valueFrom:
+      configMapKeyRef:
+        name: postgres-config
+        key: POSTGRES_USER
+  - name: POSTGRES_DB
+    valueFrom:
+      configMapKeyRef:
+        name: postgres-config
+        key: POSTGRES_DB
+  - name: POSTGRES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-secret
+        key: POSTGRES_PASSWORD
+  # Points to psql database
+  - name: DATABASE_URL
+    value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)
+  # Use pgvector for embeddings storage
+  - name: VECTOR_DB
+    value: pgvector
+  # Improves performance of workers sharing database sessions
+  - name: DATABASE_ENABLE_SESSION_SHARING
+    value: "True"
+  - name: CORS_ALLOW_ORIGIN
+    value: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
+  # Improves performance by only saving a complete response and by caching various parts of the chat workflow
+  - name: ENABLE_REALTIME_CHAT_SAVE
+    value: "False"
+  - name: ENABLE_QUERIES_CACHE
+    value: "True"
+  - name: CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE
+    value: "7"
+  # Set thread pool size for AnyIO blocking calls. If too low, the web page will become unresponsive
+  - name: THREAD_POOL_SIZE
+    value: "2000"
+  # Higher values increase the time-to-live of a model, reducing API calls to LLMs
+  - name: MODELS_CACHE_TTL
+    value: "120"
+  # The number of open connections to the database, both need to be kept under 100 when added together
+  - name: DATABASE_POOL_SIZE
+    value: "15"
+  - name: DATABASE_POOL_MAX_OVERFLOW
+    value: "20"
+  # Disabling features which will not be used
+  - name: ENABLE_AUTOCOMPLETE_GENERATION
+    value: "False"
+  - name: ENABLE_FOLLOW_UP_GENERATION
+    value: "False"
+  - name: ENABLE_IMAGE_GENERATION
+    value: "False"
+  - name: ENABLE_CODE_INTERPRETER
+    value: "False"
