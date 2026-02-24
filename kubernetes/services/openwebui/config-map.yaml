@@ -41,7 +41,7 @@ data:
   ENABLE_CODE_INTERPRETER: "False"
   # Non-sensitive variables to enable oauth
   ENABLE_OAUTH_SIGNUP: "True"
-  OPENID_PROVIDER_URL: "https://<your-adfs-server>/adfs/.well-known/openid-configuration"
-  OAUTH_SCOPES: "openid email profile offline_access"
   ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
-  OPENID_REDIRECT_URI: "http://sotongpt.soton.ac.uk/oauth/oidc/callback"
+  OAUTH_SCOPES: "openid email profile offline_access"
+  OPENID_PROVIDER_URL: "https://login.microsoftonline.com/your-tenant-guid/v2.0/.well-known/openid-configuration"
+  MICROSOFT_REDIRECT_URI: "http://sotongpt.soton.ac.uk/oauth/microsoft/callback"
