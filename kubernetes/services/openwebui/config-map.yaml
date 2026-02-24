@@ -43,5 +43,4 @@ data:
   ENABLE_OAUTH_SIGNUP: "True"
   ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
   OAUTH_SCOPES: "openid email profile offline_access"
-  OPENID_PROVIDER_URL: "https://login.microsoftonline.com/your-tenant-guid/v2.0/.well-known/openid-configuration"
   MICROSOFT_REDIRECT_URI: "http://sotongpt.soton.ac.uk/oauth/microsoft/callback"
