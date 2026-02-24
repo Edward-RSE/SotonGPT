@@ -6,6 +6,8 @@ metadata:
   labels:
     app: openwebui
 data:
+  # URL the service is available at
+  WEBUI_URL: "http://sotongpt.soton.ac.uk"
   # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
   UVICORN_WORKERS: "4"
   # Set thread pool size for AnyIO blocking calls. If too low, the web page will
@@ -37,3 +39,9 @@ data:
   ENABLE_FOLLOW_UP_GENERATION: "False"
   ENABLE_IMAGE_GENERATION: "False"
   ENABLE_CODE_INTERPRETER: "False"
+  # Non-sensitive variables to enable oauth
+  ENABLE_OAUTH_SIGNUP: "True"
+  OPENID_PROVIDER_URL: "https://<your-adfs-server>/adfs/.well-known/openid-configuration"
+  OAUTH_SCOPES: "openid email profile offline_access"
+  ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
+  OPENID_REDIRECT_URI: "http://sotongpt.soton.ac.uk/oauth/oidc/callback"
