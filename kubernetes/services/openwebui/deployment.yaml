@@ -27,7 +27,7 @@ spec:
             ]
       containers:
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:v0.8.3
+          image: ghcr.io/open-webui/open-webui:v0.8.12
           ports:
             - containerPort: 8080
           envFrom:
@@ -79,8 +79,8 @@ spec:
             - name: DATABASE_URL
               value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)
             # Configure OpenID provider URL for oauth
-            - name: OPENID_PROVIDER_URL
-              value: "https://login.microsoftonline.com/$(MICROSOFT_CLIENT_TENANT_ID)/v2.0/.well-known/openid-configuration"
+            # - name: OPENID_PROVIDER_URL
+            #   value: "https://login.microsoftonline.com/$(MICROSOFT_CLIENT_TENANT_ID)/v2.0/.well-known/openid-configuration"
           resources:
             requests:
               cpu: 4
