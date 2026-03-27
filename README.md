@@ -1,7 +1,9 @@
 # SotonGPT
 
-This is a repository containing the files used to deploy SotonGPT. Note that a GPU is required to deploy SotonGPT using
-both Docker and Kubernetes.
+This is a repository containing the files used to deploy SotonGPT. Note that GPUs are required to deploy SotonGPT 
+using both Docker and Kubernetes.
+
+On the SotonGPT host machine, this repository has been cloned to `/opt/sotongpt-k8s`.
 
 ## Deploying SotonGPT with Docker
 
@@ -257,7 +259,14 @@ these backends, Open WebUI is practically unusable with concurrent users.
 
 #### Authenticated login
 
-TODO: this will allow login using university credentials.
+TODO: this will allow login using university credentials. For the PoC, we will not deal with this as we also need an
+      SSL certificate.
+
+### Redis
+
+Redis is used for sharing state between pod replicas and OpenWebUI workers. If neither of these are required, then
+the Redis support can be disabled by commenting out the environment variables starting with `WEBSOCKET_` in the
+deployment manfiest of Open WebUI.
 
 ### Ollama
 
@@ -348,7 +357,7 @@ compatible.
 
 #### Current models
 
-There are currently FIVE LLMs configured in `kubernetes/services/vllm` which have been tested to work on the SotonGPT
+There are currently five LLMs configured in `kubernetes/services/vllm` which have been tested to work on the SotonGPT
 host and have acceptable interactive token throughput:
 
 - Llama3 70B

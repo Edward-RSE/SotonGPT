@@ -9,9 +9,7 @@ import requests
 
 from locust import HttpUser, between, task
 
-SOTONGPT_TOKEN_USER = os.getenv(
-    "SOTONGPT_TOKEN_USER", ""
-)
+SOTONGPT_TOKEN_USER = os.getenv("SOTONGPT_TOKEN_USER", "")
 REQUEST_HEADERS = {"Authorization": f"Bearer {SOTONGPT_TOKEN_USER}"}
 
 logging.basicConfig(
@@ -19,38 +17,97 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+TOKENS_PER_WORD = 1.3
+LARGE_CONTEXT_MIN_RATIO = 0.50
+LARGE_CONTEXT_MAX_RATIO = 0.95
+
 
 class APIUser(HttpUser):
-    wait_time = between(15, 60)
+    """
+    Locust user class for load testing an Open WebUI-compatible chat completion API.
+
+    On startup, available models are fetched from the API along with their maximum
+    context lengths. If the model fetch fails, all tasks are skipped gracefully.
+
+    The following tasks are executed at the weights shown:
+
+        - create_chat_completion (10): single-turn completion with a random prompt
+        - create_completion_with_history (5): multi-turn completion with a fixed history
+        - upload_analyze_and_delete_file (3): upload a file, analyse it, delete it untracked
+        - upload_and_analyze_file (3): upload a file, analyse it, delete it (all tracked)
+        - large_context_window_completion (3): multi-turn completion targeting 90% of the
+          selected model's maximum context length
+
+    Each virtual user waits between 15 and 30 seconds between tasks.
+    All requests time out after 300 seconds.
+    """
     MAX_TIMEOUT = 300
+    # wait_time = between(15, 30)
+    wait_time = between(1, 5)
 
     def on_start(self) -> None:
-        self.models = ("qwen3-32b", "qwen25-14b-instruct", "qwen25-7b-instruct")
+        """Fetch available models and their context lengths from the API, skipping tasks if the call fails."""
+        self.models = self._fetch_models()
 
-    # ============================================================================
-    # Helper Methods - File Operations
-    # ============================================================================
+    def _fetch_models(self) -> dict[str, int] | None:
+        """Fetch all active models from the API and return a mapping of model ID to max context length."""
+        try:
+            response = requests.get(
+                f"{self.host}/api/models",
+                headers=REQUEST_HEADERS,
+                timeout=self.MAX_TIMEOUT,
+            )
+            if response.status_code != 200:
+                logger.error(f"Model fetch failed: {response.status_code}")
+                return None
+
+            data = response.json().get("data", [])
+            models = {}
+            for model in data:
+                model_id = model.get("id")
+                max_model_len = model.get("max_model_len")
+                if model_id and max_model_len:
+                    models[model_id] = max_model_len
+                    logger.info(f"Registered model: {model_id} (max_model_len={max_model_len})")
+
+            if not models:
+                logger.error("No usable models found in API response")
+                return None
+
+            return models
+
+        except Exception as e:
+            logger.error(f"Model fetch error: {e}")
+            return None
+
+    def _pick_model(self) -> tuple[str, int] | None:
+        """Return a randomly selected (model_id, max_model_len) tuple, or None if no models are available."""
+        if not self.models:
+            logger.warning("No models available, skipping task")
+            return None
+        model_id = random.choice(list(self.models.keys()))
+        return model_id, self.models[model_id]
 
     def _get_example_file_paths(self) -> list[str]:
+        """Return a list of file paths for all example files in the script's directory."""
         script_dir = Path(__file__).resolve().parent
         return glob.glob(f"{script_dir}/example-files/*")
 
     def _read_file_bytes(self, file_path: str) -> bytes:
+        """Read and return the raw bytes of the file at the given path."""
         with open(file_path, "rb") as f:
             return f.read()
 
     def _extract_file_id(self, response: requests.Response) -> str | None:
+        """Extract and return the file ID from an API response, or None if parsing fails."""
         try:
             data = response.json()
             return data.get("id") or data.get("file_id")
         except Exception:
             return None
 
-    # ============================================================================
-    # Helper Methods - Untracked Operations (not measured by Locust)
-    # ============================================================================
-
     def _delete_file_untracked(self, file_id: str, filename: str) -> None:
+        """Delete a file by its ID without Locust tracking the request."""
         try:
             response = requests.delete(
                 f"{self.host}/api/v1/files/{file_id}",
@@ -64,25 +121,43 @@ class APIUser(HttpUser):
         except Exception as e:
             logger.error(f"Delete error: {filename} - {e}")
 
-    # ============================================================================
-    # Helper Methods - Tracked Operations (measured by Locust)
-    # ============================================================================
-
     def _analyze_file_tracked(self, file_id: str, filename: str) -> None:
+        """Fetch uploaded file content and send a tracked chat completion request with it inlined."""
+        model = self._pick_model()
+        if not model:
+            return
+        model_id, _ = model
+
+        # Fetch the file content back from the API
+        try:
+            content_response = requests.get(
+                f"{self.host}/api/v1/files/{file_id}/content",
+                headers=REQUEST_HEADERS,
+                timeout=self.MAX_TIMEOUT,
+            )
+            if content_response.status_code != 200:
+                logger.error(f"File content fetch failed: {filename} ({content_response.status_code})")
+                return
+            file_text = content_response.text
+        except Exception as e:
+            logger.error(f"File content fetch error: {filename} - {e}")
+            return
+
         prompts = [
-            f"Summarize the contents of {filename}",
-            f"What are the key points in {filename}?",
-            f"Extract the main data from {filename}",
-            f"Analyze {filename} and provide insights",
+            f"Summarise the contents of the following file ({filename}):\n\n{{content}}",
+            f"What are the key points in the following file ({filename})?\n\n{{content}}",
+            f"Extract the main data from the following file ({filename}):\n\n{{content}}",
+            f"Analyse the following file ({filename}) and provide insights:\n\n{{content}}",
         ]
 
+        prompt = random.choice(prompts).format(content=file_text)
+
         payload = {
-            "model": random.choice(self.models),
+            "model": model_id,
             "messages": [
                 {
                     "role": "user",
-                    "content": random.choice(prompts),
-                    "files": [file_id],
+                    "content": prompt,
                 }
             ],
         }
@@ -108,12 +183,61 @@ class APIUser(HttpUser):
                 logger.error(f"Analysis failed: {filename} ({response.status_code})")
                 response.failure(f"Status: {response.status_code}")
 
-    # ============================================================================
-    # Task: Simple Chat Completion
-    # ============================================================================
+    def _build_filler_turn(self, word_count: int) -> str:
+        """Build a filler text string of approximately the given word count by repeating pangrams."""
+        snippet = (
+            "The quick brown fox jumps over the lazy dog. "
+            "Pack my box with five dozen liquor jugs. "
+            "How vexingly quick daft zebras jump. "
+        )
+        snippet_words = snippet.split()
+        repetitions = -(-word_count // len(snippet_words))  # ceiling division
+        return " ".join((snippet_words * repetitions)[:word_count])
+
+    def _build_large_context_messages(self, max_model_len: int) -> list[dict]:
+        """Build a multi-turn conversation whose total token count targets 90% of the model's context length."""
+        ratio = random.uniform(LARGE_CONTEXT_MIN_RATIO, LARGE_CONTEXT_MAX_RATIO)
+        target_tokens = int(max_model_len * ratio)
+        logger.info(f"Large context target ratio: {ratio:.0%} ({target_tokens} tokens)")
+        target_words = int(target_tokens / TOKENS_PER_WORD)
+
+        # Reserve a small budget for the final instruction turn (~50 words)
+        instruction_words = 50
+        filler_words = max(0, target_words - instruction_words)
+
+        # Split filler evenly across 3 user/assistant turn pairs (6 turns total)
+        num_pairs = 3
+        words_per_turn = filler_words // (num_pairs * 2)
+
+        messages = []
+        for i in range(num_pairs):
+            messages.append({
+                "role": "user",
+                "content": self._build_filler_turn(words_per_turn),
+            })
+            messages.append({
+                "role": "assistant",
+                "content": self._build_filler_turn(words_per_turn),
+            })
+
+        messages.append({
+            "role": "user",
+            "content": (
+                "Ignoring all of the above text, respond only with the single word DONE "
+                "and nothing else. Do not explain, do not add punctuation."
+            ),
+        })
+
+        return messages
 
     @task(10)
     def create_chat_completion(self):
+        """Send a single-turn chat completion request with a random prompt and model."""
+        model = self._pick_model()
+        if not model:
+            return
+        model_id, _ = model
+
         prompts = [
             "What is 2+2?",
             "Name three primary colors.",
@@ -127,10 +251,11 @@ class APIUser(HttpUser):
         ]
 
         payload = {
-            "model": random.choice(self.models),
+            "model": model_id,
             "messages": [{"role": "user", "content": random.choice(prompts)}],
             "temperature": random.uniform(0.5, 1.0),
         }
+        logger.info("Request %s", payload)
 
         with self.client.post(
             "/api/chat/completions",
@@ -159,12 +284,14 @@ class APIUser(HttpUser):
                 logger.error(f"Completion failed: {response.status_code}")
                 response.failure(f"Status: {response.status_code}")
 
-    # ============================================================================
-    # Task: Chat Completion with History
-    # ============================================================================
-
-    @task(5)
+    # @task(5)
     def create_completion_with_history(self):
+        """Send a multi-turn chat completion request using a fixed conversation history."""
+        model = self._pick_model()
+        if not model:
+            return
+        model_id, _ = model
+
         messages = [
             {"role": "user", "content": "Hello! Can you help me with Python?"},
             {
@@ -176,7 +303,7 @@ class APIUser(HttpUser):
 
         with self.client.post(
             "/api/chat/completions",
-            json={"model": random.choice(self.models), "messages": messages},
+            json={"model": model_id, "messages": messages},
             headers={**REQUEST_HEADERS, "Content-Type": "application/json"},
             catch_response=True,
             timeout=self.MAX_TIMEOUT,
@@ -192,12 +319,13 @@ class APIUser(HttpUser):
                 logger.error(f"Multi-turn failed: {response.status_code}")
                 response.failure(f"Status: {response.status_code}")
 
-    # ============================================================================
-    # Task: Upload, Analyze, Delete (delete untracked)
-    # ============================================================================
-
-    @task(3)
+    # @task(3)
     def upload_analyze_and_delete_file(self):
+        """Upload a random example file, analyse it via a tracked request, then delete it untracked."""
+        if not self.models:
+            logger.warning("No models available, skipping task")
+            return
+
         file_paths = self._get_example_file_paths()
         if not file_paths:
             logger.warning("No example files found")
@@ -233,12 +361,13 @@ class APIUser(HttpUser):
                 logger.error(f"Upload failed: {upload_response.status_code}")
                 upload_response.failure(f"Status: {upload_response.status_code}")
 
-    # ============================================================================
-    # Task: Upload, Analyze, Delete (all tracked)
-    # ============================================================================
-
-    @task(3)
+    # @task(3)
     def upload_and_analyze_file(self):
+        """Upload a random example file, analyse it, and delete it — all tracked by Locust."""
+        if not self.models:
+            logger.warning("No models available, skipping task")
+            return
+
         file_paths = self._get_example_file_paths()
         if not file_paths:
             logger.warning("No example files found")
@@ -286,3 +415,41 @@ class APIUser(HttpUser):
             else:
                 logger.error(f"Upload failed: {upload_response.status_code}")
                 upload_response.failure(f"Status: {upload_response.status_code}")
+
+    # @task(3)
+    def large_context_window_completion(self):
+        """Send a multi-turn completion request targeting 90% of the selected model's max context length."""
+        model = self._pick_model()
+        if not model:
+            return
+        model_id, max_model_len = model
+
+        messages = self._build_large_context_messages(max_model_len)
+        payload = {"model": model_id, "messages": messages}
+
+        with self.client.post(
+            "/api/chat/completions",
+            json=payload,
+            headers={**REQUEST_HEADERS, "Content-Type": "application/json"},
+            catch_response=True,
+            timeout=self.MAX_TIMEOUT,
+        ) as response:
+            elapsed = response.elapsed.total_seconds()
+
+            if response.status_code == 200:
+                try:
+                    tokens = (
+                        response.json().get("usage", {}).get("total_tokens", "unknown")
+                    )
+                    logger.info(
+                        f"Large context success - Model: {model_id}, Time: {elapsed:.2f}s, Tokens: {tokens}"
+                    )
+                    response.success() if elapsed <= self.MAX_TIMEOUT else response.failure(
+                        f"Timeout: {elapsed:.2f}s"
+                    )
+                except Exception as e:
+                    logger.error(f"Parse error: {e}")
+                    response.failure(f"Invalid response: {e}")
+            else:
+                logger.error(f"Large context failed: {response.status_code}")
+                response.failure(f"Status: {response.status_code}")
