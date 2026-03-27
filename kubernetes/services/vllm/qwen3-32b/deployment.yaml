@@ -25,26 +25,30 @@ spec:
         - name: vllm
           image: vllm/vllm-openai:v0.14.1
           args:
-            - Qwen/Qwen3-32B
-            - --tensor-parallel-size
-            - "2"
-            - --gpu-memory-utilization
-            - "0.85"
-            - --host
-            - 0.0.0.0
-            - --port
-            - "8000"
-            - --reasoning-parser
-            - qwen3
-            # - --default-chat-template-kwarg
-            # - '{"enable_thinking": false}'
-            - --max-num-batched-tokens
-            - "4096"
+              - abhishekchohan/Qwen3-32B-AWQ
+              - --tensor-parallel-size
+              - "2"
+              - --gpu-memory-utilization
+              - "0.90"
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8000"
+              - --reasoning-parser
+              - qwen3
+              - --kv-cache-dtype
+              - fp8
+              - --hf-overrides
+              - '{"max_position_embeddings":131072,"rope_scaling":{"rope_type":"yarn","factor":4.0,"original_max_position_embeddings":32768}}'
+              - --max-model-len
+              - "131072"
           ports:
             - containerPort: 8000
           env:
             - name: VLLM_LOGGING_LEVEL
               value: INFO
+            - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+              value: "1"
           resources:
             limits:
               nvidia.com/gpu: "2"

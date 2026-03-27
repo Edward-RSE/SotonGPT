@@ -8,6 +8,10 @@ metadata:
 data:
   # URL the service is available at
   WEBUI_URL: "http://sotongpt.soton.ac.uk"
+  CORS_ALLOW_ORIGIN: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
+  # Set the following to false when using http
+  WEBUI_SESSION_COOKIE_SECURE: "False"
+  WEBUI_AUTH_COOKIE_SECURE: "False"
   # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
   UVICORN_WORKERS: "4"
   # Set thread pool size for AnyIO blocking calls. If too low, the web page will
@@ -15,22 +19,23 @@ data:
   # higher
   THREAD_POOL_SIZE: "160"
   # Enabling redis websocket required for running replicas
+  # Note that the URL for redis is set in the deployment manifest
   ENABLE_WEBSOCKET_SUPPORT: "True"
   WEBSOCKET_MANAGER: "redis"
   # Enable production environment, which hides the swagger docs
   ENV: "prod"
+  GLOBAL_LOG_LEVEL: "INFO"
   ENABLE_EASTER_EGGS: "False"
   # Use pgvector for embeddings storage
   VECTOR_DB: "pgvector"
   # Improves performance of workers sharing database sessions
   DATABASE_ENABLE_SESSION_SHARING: "True"
-  CORS_ALLOW_ORIGIN: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
   # Improves performance by only saving a complete response and by caching various parts of the chat workflow
   ENABLE_REALTIME_CHAT_SAVE: "False"
   ENABLE_QUERIES_CACHE: "True"
   CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE: "7"
   # Higher values increase the time-to-live of a model, reducing API calls to LLMs
-  MODELS_CACHE_TTL: "120"
+  MODELS_CACHE_TTL: "150"
   # The number of open connections to the database, both need to be kept under 100 when added together
   DATABASE_POOL_SIZE: "15"
   DATABASE_POOL_MAX_OVERFLOW: "20"
@@ -40,7 +45,8 @@ data:
   ENABLE_IMAGE_GENERATION: "False"
   ENABLE_CODE_INTERPRETER: "False"
   # Non-sensitive variables to enable oauth
-  ENABLE_OAUTH_SIGNUP: "True"
   ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
-  OAUTH_SCOPES: "openid email profile offline_access"
-  MICROSOFT_REDIRECT_URI: "http://sotongpt.soton.ac.uk/oauth/microsoft/callback"
+  # ENABLE_OAUTH_SIGNUP: "True"
+  # ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
+  # OAUTH_SCOPES: "openid email profile offline_access"
+  # MICROSOFT_REDIRECT_URI: "http://sotongpt.soton.ac.uk/oauth/microsoft/callback"
