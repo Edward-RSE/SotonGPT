@@ -1,0 +1,4 @@
+vLLM deployed: {{ .Values.model.id }}
+
+  kubectl logs -n {{ .Values.namespace }} -l app=vllm-{{ .Values.model.name }} -f
+  curl http://vllm-{{ .Values.model.name }}.{{ .Values.namespace }}.svc.cluster.local/v1/models

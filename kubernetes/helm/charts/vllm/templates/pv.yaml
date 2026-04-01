@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vllm-{{ .Values.model.name }}-pv
+spec:
+  storageClassName: manual
+  claimRef:
+    name: vllm-{{ .Values.model.name }}-pvc
+    namespace: {{ .Values.namespace }}
+  capacity:
+    storage: {{ .Values.resources.storage }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.model.hostPath }}
+    type: DirectoryOrCreate

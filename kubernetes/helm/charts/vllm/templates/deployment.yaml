@@ -1,0 +1,81 @@
+{{- if not .Values.model.name }}{{ fail "model.name is required" }}{{ end }}
+{{- if not .Values.model.id }}{{ fail "model.id is required" }}{{ end }}
+{{- if not .Values.model.hostPath }}{{ fail "model.hostPath is required" }}{{ end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-{{ .Values.model.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: vllm-{{ .Values.model.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-{{ .Values.model.name }}
+  template:
+    metadata:
+      labels:
+        app: vllm-{{ .Values.model.name }}
+    spec:
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: vllm-{{ .Values.model.name }}-pvc
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Gi
+      containers:
+        - name: vllm
+          image: "vllm/vllm-openai:v{{ .Chat.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          args:
+            - {{ .Values.model.id }}
+            {{- toYaml .Values.vllmArgs | nindent 12 }}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: VLLM_LOGGING_LEVEL
+              value: INFO
+            - name: VLLM_SLEEP_WHEN_IDLE
+              value: "1"
+          resources:
+            limits:
+              nvidia.com/gpu: {{ .Values.resources.limits.gpu }}
+              cpu: {{ .Values.resources.limits.cpu}}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              nvidia.com/gpu: {{ .Values.resources.requests.gpu }}
+              cpu: {{ .Values.resources.requests.cpu}}
+              memory: {{ .Values.resources.requests.memory }}
+          volumeMounts:
+            - name: cache
+              mountPath: /root/.cache/huggingface
+            - name: shm
+              mountPath: /dev/shm
+          # Has the container finished initialising?
+          startupProbe:
+            httpGet:
+              path: /v1/models  # will return 200 when model/container is ready
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 120  # 120 * 10s = 20 minutes max startup time, required for large models
+            timeoutSeconds: 5
+          # Is the container alive, should it be restarted?
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
+          # Is the container ready to receive traffic?
+          readinessProbe:
+            httpGet:
+              path: /v1/models  # stricter check than /health
+              port: 8000
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5

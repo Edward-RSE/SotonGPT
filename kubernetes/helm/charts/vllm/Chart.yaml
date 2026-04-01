@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vllm
+description: Helm chart for deploying vLLM instances for SotonGPT
+type: application
+version: 0.1.0
+appVersion: 0.14.1

@@ -1,0 +1,35 @@
+
+# ---------------------------------------------------------------------------
+# REQUIRED — must be provided at install time, no defaults
+# ---------------------------------------------------------------------------
+model:
+  # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
+  name: ""
+  # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
+  id: ""
+  # Path to the directory, on the host, where model weights will be kept
+  hostPath: ""
+
+# ---------------------------------------------------------------------------
+# OPTIONAL — sensible defaults, override only when needed
+# ---------------------------------------------------------------------------
+namespace: sotongpt
+
+# Free-form vLLM CLI args — append anything the vLLM docs support.
+# The model ID is always prepended automatically, do not repeat it here
+vllmArgs:
+  - --gpu-memory-utilization
+  - "0.9"
+
+# Resource requirements for pods. These values are probably sensible for most
+# small- to mid-sized models
+resources:
+  limits:
+    gpu: "1"
+    cpu: "8"
+    memory: 96Gi
+  requests:
+    gpu: "1"
+    cpu: "2"
+    memory: 20Gi
+  storage: 64Gi
