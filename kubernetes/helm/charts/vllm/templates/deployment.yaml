@@ -28,7 +28,7 @@ spec:
             sizeLimit: 16Gi
       containers:
         - name: vllm
-          image: "vllm/vllm-openai:v{{ .Chat.AppVersion }}"
+          image: "vllm/vllm-openai:v{{ .Chart.AppVersion }}"
           imagePullPolicy: IfNotPresent
           args:
             - {{ .Values.model.id }}
