@@ -2,12 +2,10 @@
 
 source venv/bin/activate
 locust \
-    --users 1 \
+	--headless \
+    --users 100 \
     --spawn-rate 1 \
-    --run-time 1h \
-    --json \
-    --json-file "locust" \
+    --run-time 48h \
     --print-stats \
-    --html "stats.html" \
+    --html "locust-stats.html" \
     --host http://sotongpt.soton.ac.uk
-
