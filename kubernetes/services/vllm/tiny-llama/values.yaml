@@ -1,0 +1,45 @@
+
+# ---------------------------------------------------------------------------
+# REQUIRED — must be provided at install time, no defaults
+# ---------------------------------------------------------------------------
+model:
+  # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
+  name: tiny-llama
+  # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
+  id: TinyLlama/TinyLlama-1.1B-Chat-v1.0
+  # Path to the directory, on the host, where model weights will be kept
+  hostPath: /home/ejp1v21/sotongpt-models/vllm/tiny-llama
+
+# ---------------------------------------------------------------------------
+# OPTIONAL — sensible defaults, override only when needed
+# ---------------------------------------------------------------------------
+namespace: sotongpt
+
+# Free-form vLLM CLI args — append anything the vLLM docs support.
+# The model ID is always prepended automatically, do not repeat it here
+vllmArgs:
+  - --host
+  - 0.0.0.0
+  - --port
+  - "8000"
+  - --gpu-memory-utilization
+  - "0.6"
+  - --max-model-len
+  - "1024"
+  - --max-num-seqs
+  - "1"
+  - --dtype
+  - float16
+
+# Resource requirements for pods. These values are probably sensible for most
+# small- to mid-sized models
+resources:
+  limits:
+    gpu: "1"
+    cpu: "4"
+    memory: 16Gi
+  requests:
+    gpu: "1"
+    cpu: "2"
+    memory: 8Gi
+  storage: 64Gi

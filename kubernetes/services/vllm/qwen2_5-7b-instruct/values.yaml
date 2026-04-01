@@ -1,0 +1,48 @@
+
+# ---------------------------------------------------------------------------
+# REQUIRED — must be provided at install time, no defaults
+# ---------------------------------------------------------------------------
+model:
+  # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
+  name: qwen2-5-7b-instruct
+  # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
+  id: Qwen/Qwen2.5-7B-Instruct-AWQ
+  # Path to the directory, on the host, where model weights will be kept
+  hostPath: /home/ejp1v21/sotongpt-models/vllm/qwen2-5-7b-instruct
+
+# ---------------------------------------------------------------------------
+# OPTIONAL — sensible defaults, override only when needed
+# ---------------------------------------------------------------------------
+namespace: sotongpt
+
+# Free-form vLLM CLI args — append anything the vLLM docs support.
+# The model ID is always prepended automatically, do not repeat it here
+vllmArgs:
+  - --gpu-memory-utilization
+  - "0.90"
+  - --dtype
+  - auto
+  - --tensor-parallel-size
+  - "1"
+  - --max-num-batched-tokens
+  - "8192"
+  - --max-num-seqs
+  - "96"
+  - --enable-chunked-prefill
+  - --port
+  - "8000"
+  - --host
+  - 0.0.0.0
+
+# Resource requirements for pods. These values are probably sensible for most
+# small- to mid-sized models
+resources:
+  limits:
+    gpu: "1"
+    cpu: "8"
+    memory: 96Gi
+  requests:
+    gpu: "1"
+    cpu: "2"
+    memory: 20Gi
+  storage: 64Gi
