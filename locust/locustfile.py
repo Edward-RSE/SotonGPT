@@ -71,7 +71,9 @@ class APIUser(HttpUser):
                     logger.info(f"Registered model: {model_id} (max_model_len={max_model_len})")
 
             if not models:
-                logger.error("No usable models found in API response")
+                logger.error(
+                    "No usable models found in API response %s", response.json()
+                )
                 return None
 
             return models
@@ -284,7 +286,7 @@ class APIUser(HttpUser):
                 logger.error(f"Completion failed: {response.status_code}")
                 response.failure(f"Status: {response.status_code}")
 
-    # @task(5)
+    @task(5)
     def create_completion_with_history(self):
         """Send a multi-turn chat completion request using a fixed conversation history."""
         model = self._pick_model()
@@ -319,7 +321,7 @@ class APIUser(HttpUser):
                 logger.error(f"Multi-turn failed: {response.status_code}")
                 response.failure(f"Status: {response.status_code}")
 
-    # @task(3)
+    @task(3)
     def upload_analyze_and_delete_file(self):
         """Upload a random example file, analyse it via a tracked request, then delete it untracked."""
         if not self.models:
@@ -361,7 +363,7 @@ class APIUser(HttpUser):
                 logger.error(f"Upload failed: {upload_response.status_code}")
                 upload_response.failure(f"Status: {upload_response.status_code}")
 
-    # @task(3)
+    @task(3)
     def upload_and_analyze_file(self):
         """Upload a random example file, analyse it, and delete it — all tracked by Locust."""
         if not self.models:
@@ -416,7 +418,7 @@ class APIUser(HttpUser):
                 logger.error(f"Upload failed: {upload_response.status_code}")
                 upload_response.failure(f"Status: {upload_response.status_code}")
 
-    # @task(3)
+    @task(3)
     def large_context_window_completion(self):
         """Send a multi-turn completion request targeting 90% of the selected model's max context length."""
         model = self._pick_model()
