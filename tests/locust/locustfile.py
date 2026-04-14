@@ -2,6 +2,7 @@ import logging
 import os
 import random
 from dataclasses import dataclass
+from typing import Any
 
 from locust import HttpUser, between, run_single_user, task
 
@@ -72,12 +73,20 @@ class User(HttpUser):
     Open WebUI endpoints.
     """
 
-    MAX_TIMEOUT = 300
+    MAX_TIMEOUT = 600
+
     # Simulate realistic human think-time between tasks
     wait_time = between(5, 60)
 
     def _fetch_models(self) -> list[Model]:
-        """Fetch available models from the API endpoint."""
+        """Fetch available models from the API endpoint.
+
+        Returns
+        -------
+        list[Model]
+            A list of models available on the API to normal users.
+
+        """
         response = self.client.get(
             "/api/v1/models",
             headers={**REQUEST_HEADERS, "Content-Type": "application/json"},
@@ -123,7 +132,7 @@ class User(HttpUser):
         # We will only test the thin models, so filter out the base models and
         # set the model length using the value for the base models
         avail_models = [
-            Model(model.model, base_models[model.base_model].length, model.base_model)
+            Model(model.name, base_models[model.base_model].length, model.base_model)
             for model in pending_models
         ]
         logger.info(f"Available models: {avail_models}")
@@ -137,16 +146,23 @@ class User(HttpUser):
         -------
         model
             A Model dataclass describing the model picked
+
         """
         return random.choice(self.models)
 
-    def _post_chat_completion(self, payload: dict) -> None:
+    def _post_chat_completion(self, payload: dict) -> dict[str, Any]:
         """Send a chat completion request to the API.
 
         Parameters
         ----------
         payload : dict
             The request body to send to /api/v1/chat/completions.
+
+        Returns
+        -------
+        dict[str, str]
+            The response from the API as a JSON.
+
         """
         logger.debug(f"Sending request to Chat Completion with payload: {payload}")
         response = self.client.post(
@@ -164,6 +180,19 @@ class User(HttpUser):
             f"Response success from /api/v1/chat/completions - time: {time:.2f}s, tokens: {tokens}"
         )
 
+        return response_json
+
+    def _reset_long_conversation(self) -> None:
+        """Reset long conversation variables."""
+        self._long_conv = [
+            {
+                "role": "user",
+                "content": random.choice(CHAT_COMPLETION_PROMPTS),
+            }
+        ]
+        self._conv_model = self._pick_model()
+        self._conv_cut_length = random.randint(1024, self._conv_model.length - 1024)
+
     ############################################################################
 
     def on_start(self) -> None:
@@ -179,6 +208,8 @@ class User(HttpUser):
         except Exception as e:
             logger.error(f"Failed to fetch models on start-up: {e}")
             self.environment.runner.quit()
+
+        self._reset_long_conversation()
 
     ############################################################################
     # Low weight tasks
@@ -200,10 +231,10 @@ class User(HttpUser):
         )
 
     ############################################################################
-    # High weight tasks
+    # High weight tasks - most representative of actual usage
 
     @task(10)
-    def send_chat_completion(self) -> None:
+    def send_single_chat_completion(self) -> None:
         """Send a single-turn chat completion request with a random prompt and model."""
         model = self._pick_model()
         model_id = model.name
@@ -215,6 +246,25 @@ class User(HttpUser):
             "temperature": random.uniform(0.1, 1.0),
         }
         self._post_chat_completion(payload)
+
+    @task(10)
+    def send_conversation_chat_completion(self) -> None:
+        """Send a multi-turn chat completion, which keeps increasing in size."""
+        payload = {
+            "model": self._conv_model.name,
+            "messages": self._long_conv,
+            "temperature": random.uniform(0.1, 1.0),
+        }
+
+        response = self._post_chat_completion(payload)
+        message = response["choices"][0]["message"]
+        usage = response["usage"]["total_tokens"]
+
+        # subtract 1024 from the model length as a safety margin
+        if usage < self._conv_model.length - self._conv_cut_length:
+            self._long_conv.append(message)
+        else:
+            self._reset_long_conversation()
 
 
 if __name__ == "__main__":
