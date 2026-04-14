@@ -22,6 +22,7 @@ data:
   # Note that the URL for redis is set in the deployment manifest
   ENABLE_WEBSOCKET_SUPPORT: "True"
   WEBSOCKET_MANAGER: "redis"
+  REDIS_KEY_PREFIX: "open-webui"
   # Enable production environment, which hides the swagger docs
   ENV: "prod"
   GLOBAL_LOG_LEVEL: "INFO"

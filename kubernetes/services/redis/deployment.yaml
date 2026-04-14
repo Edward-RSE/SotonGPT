@@ -19,18 +19,25 @@ spec:
         - name: redis-valkey
           image: valkey/valkey:8.0.3-alpine
           args:
-            - "--requirepass"
-            - "$(REDIS_PASSWORD)"
-            - "--appendonly"
-            - "yes"
-            - "--appendfsync"
-            - "everysec"
-            - "--maxmemory"
-            - "3gb"
-            - "--maxmemory-policy"
-            - "allkeys-lru"
-            - "--protected-mode"
-            - "no"
+            - --requirepass
+            - $(REDIS_PASSWORD)
+            - --appendonly
+            - yes
+            - --appendfsync
+            - everysec
+            - --maxmemory
+            - 3gb
+            - --maxmemory-policy
+            - allkeys-lru
+            - --protected-mode
+            - no
+            - --maxclients
+            - "1000"
+            - --timeout
+            - "1800"
+            - --save
+            - "30"
+            - "1"
           env:
             - name: REDIS_PASSWORD
               valueFrom:
