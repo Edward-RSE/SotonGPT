@@ -8,7 +8,7 @@ metadata:
 data:
   # URL the service is available at
   WEBUI_URL: "http://sotongpt.soton.ac.uk"
-  CORS_ALLOW_ORIGIN: "http://sotongpt.soton.ac.uk;https://sotongpt.soton.ac.uk"
+  CORS_ALLOW_ORIGIN: "http://sotongpt.soton.ac.uk"
   # Set the following to false when using http
   WEBUI_SESSION_COOKIE_SECURE: "False"
   WEBUI_AUTH_COOKIE_SECURE: "False"
