@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+from dataclasses import dataclass
 
 from locust import HttpUser, between, run_single_user, task
 
@@ -52,6 +53,12 @@ CHAT_COMPLETION_PROMPTS = [
     "Analyze the geopolitical consequences of a major undersea internet cable being severed.",
 ]
 
+@dataclass
+class Model:
+    name: str
+    length: int
+    base_model: str | None
+
 
 class User(HttpUser):
     """Locust user class for load testing SotonGPT.
@@ -69,7 +76,7 @@ class User(HttpUser):
     # Simulate realistic human think-time between tasks
     wait_time = between(5, 60)
 
-    def _fetch_models(self) -> dict[str, int]:
+    def _fetch_models(self) -> list[Model]:
         """Fetch available models from the API endpoint."""
         response = self.client.get(
             "/api/v1/models",
@@ -87,39 +94,51 @@ class User(HttpUser):
         if len(model_data) == 0:
             raise ValueError("No models available in SotonGPT")
 
-        pending_models = []
         base_models = {}
+        pending_models = []
 
+        # Get all the models in the API. Some models will not have a max_model_len
+        # as they are not "base" models, e.g. they are thin wrappers, created
+        # in the OpenWeb UI interface, around a "base" models served by vLLM.
+        # These "thin models" tend to have easier to use model ids or have a limited
+        # set of features compared to the base model. These are the "pending_models".
+        # We need to first find the base models they are based on, so we can determine
+        # the max model length. This is not returned by the API for some reason for
+        # the thin models.
         for model in model_data:
             info = model["info"]
             if model["owned_by"] != "openai" or model["connection_type"] != "local":
                 continue
             if model.get("preset", False):
                 pending_models.append(
-                    {"model": model["id"], "base_model": info["base_model_id"]}
+                    Model(name=model["id"], length=0, base_model=info["base_model_id"])
                 )
             else:
-                base_models[info["id"]] = int(model["max_model_len"])
+                base_models[info["id"]] = Model(
+                    name=info["id"],
+                    length=int(model["max_model_len"]),
+                    base_model=None,
+                )
 
-        user_facing_models = {
-            model_dict["model"]: base_models[model_dict["base_model"]]
-            for model_dict in pending_models
-        }
-        logger.info(f"Available models: {list(user_facing_models.keys())}")
+        # We will only test the thin models, so filter out the base models and
+        # set the model length using the value for the base models
+        avail_models = [
+            Model(model.model, base_models[model.base_model].length, model.base_model)
+            for model in pending_models
+        ]
+        logger.info(f"Available models: {avail_models}")
 
-        return user_facing_models
+        return avail_models
 
-    def _pick_model(self) -> tuple[str, int]:
+    def _pick_model(self) -> Model:
         """Return a randomly selected model.
 
         Returns
         -------
-        tuple[str, int]
-            A (model_id, max_model_len) pair.
+        model
+            A Model dataclass describing the model picked
         """
-        model_id = random.choice(list(self.models.keys()))
-
-        return model_id, self.models[model_id]
+        return random.choice(self.models)
 
     def _post_chat_completion(self, payload: dict) -> None:
         """Send a chat completion request to the API.
@@ -186,7 +205,8 @@ class User(HttpUser):
     @task(10)
     def send_chat_completion(self) -> None:
         """Send a single-turn chat completion request with a random prompt and model."""
-        model_id, _ = self._pick_model()
+        model = self._pick_model()
+        model_id = model.name
         payload = {
             "model": model_id,
             "messages": [
