@@ -1,14 +1,13 @@
-
 # ---------------------------------------------------------------------------
 # REQUIRED — must be provided at install time, no defaults
 # ---------------------------------------------------------------------------
 model:
   # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
-  name: qwen3-32b
+  name: qwen3-6-35b
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
-  id: abhishekchohan/Qwen3-32B-AWQ
+  id: QuantTrio/Qwen3.6-35B-A3B-AWQ
   # Path to the directory, on the host, where model weights will be kept
-  hostPath: /home/ejp1v21/sotongpt-models/vllm/qwen3-32b
+  hostPath: /home/ejp1v21/sotongpt-models/vllm/qwen3_6-35b
 
 # ---------------------------------------------------------------------------
 # OPTIONAL — sensible defaults, override only when needed
@@ -21,7 +20,7 @@ vllmArgs:
   - --tensor-parallel-size
   - "2"
   - --gpu-memory-utilization
-  - "0.90"
+  - "0.94"
   - --host
   - 0.0.0.0
   - --port
@@ -30,13 +29,17 @@ vllmArgs:
   - qwen3
   - --kv-cache-dtype
   - fp8
-  - --hf-overrides
-  - '{"max_position_embeddings":131072,"rope_scaling":{"rope_type":"yarn","factor":4.0,"original_max_position_embeddings":32768}}'
   - --max-model-len
   - "131072"
+  - --dtype
+  - float16
+  - --speculative-config 
+  - '{"method":"qwen3_next_mtp","num_speculative_tokens":2}'
   - --served-model-name
-  - qwen3-32b
+  - qwen3-6-35b
 
+# vLLM logging level
+vllmLogLevel: INFO
 
 # Resource requirements for pods. These values are probably sensible for most
 # small- to mid-sized models
@@ -47,6 +50,6 @@ resources:
     memory: 96Gi
   requests:
     gpu: "2"
-    cpu: "2"
+    cpu: "4"
     memory: 20Gi
   storage: 64Gi
