@@ -33,10 +33,10 @@ vllmLogLevel: INFO
 resources:
   limits:
     gpu: "1"
-    cpu: "6"
+    cpu: "8"
     memory: 96Gi
   requests:
     gpu: "1"
-    cpu: "3"
+    cpu: "4"
     memory: 20Gi
   storage: 64Gi
