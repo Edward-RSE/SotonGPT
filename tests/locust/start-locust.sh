@@ -3,7 +3,7 @@
 source venv/bin/activate
 locust \
 	--headless \
-    --users 250 \
+    --users 128 \
     --spawn-rate 1 \
     --run-time 6h \
     --print-stats \
