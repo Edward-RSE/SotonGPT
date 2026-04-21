@@ -2,11 +2,10 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: vllm
-  namespace: monitoring
+  namespace: sotongpt
 spec:
   namespaceSelector:
-    matchNames:
-      - sotongpt
+    any: true
   selector:
     matchLabels:
       app: vllm
