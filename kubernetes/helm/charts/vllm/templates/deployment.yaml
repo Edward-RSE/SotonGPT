@@ -8,8 +8,12 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     app: vllm-{{ .Values.model.name }}
+  annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8000"
+      prometheus.io/path: "/metrics"
 spec:
-  replicas: 1
+  replicas:  {{ .Values.numReplicas }}
   selector:
     matchLabels:
       app: vllm-{{ .Values.model.name }}
