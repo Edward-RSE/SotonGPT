@@ -1,5 +1,5 @@
 apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+kind: PodMonitor
 metadata:
   name: vllm
   namespace: sotongpt
@@ -8,8 +8,8 @@ spec:
     any: true
   selector:
     matchLabels:
-      app: vllm
-  endpoints:
-    - port: http
+      app: vllm-{{ .Values.model.name }}
+  podMetricsEndpoints:
+    - port: vllm
       path: /metrics
       interval: 5s

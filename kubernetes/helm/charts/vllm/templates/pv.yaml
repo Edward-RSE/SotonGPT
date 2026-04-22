@@ -10,7 +10,7 @@ spec:
   capacity:
     storage: {{ .Values.resources.storage }}
   accessModes:
-    - ReadWriteOnce
+    - ReadOnlyMany
   hostPath:
     path: {{ .Values.model.hostPath }}
     type: DirectoryOrCreate
