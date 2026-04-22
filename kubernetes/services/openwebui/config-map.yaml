@@ -26,6 +26,7 @@ data:
   # Enable production environment, which hides the swagger docs
   ENV: "prod"
   GLOBAL_LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
   ENABLE_EASTER_EGGS: "False"
   # Use pgvector for embeddings storage
   VECTOR_DB: "pgvector"
