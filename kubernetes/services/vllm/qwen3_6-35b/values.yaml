@@ -13,6 +13,7 @@ model:
 # OPTIONAL — sensible defaults, override only when needed
 # ---------------------------------------------------------------------------
 namespace: sotongpt
+numReplicas: 1
 
 # Free-form vLLM CLI args — append anything the vLLM docs support.
 # The model ID is always prepended automatically, do not repeat it here
@@ -27,21 +28,18 @@ vllmArgs:
   # Parallelism
   - --tensor-parallel-size
   - "4"
-  - --enable-expert-parallel
-  - --api-server-count
-  - "2"
   # Memory
   - --gpu-memory-utilization
-  - "0.94"
+  - "0.90"
   - --kv-cache-dtype
   - auto
   # Context & batching
   - --max-model-len
   - "131072"
   - --max-num-batched-tokens
-  - "8192"
+  - "32768"
   - --max-num-seqs
-  - "128"
+  - "64"
   # Optimisations
   - --enable-chunked-prefill
   - --enable-prefix-caching
@@ -67,10 +65,10 @@ vllmLogLevel: INFO
 resources:
   limits:
     gpu: "4"
-    cpu: "8"
-    memory: 96Gi
+    cpu: "12"
+    memory: 32Gi
   requests:
     gpu: "4"
-    cpu: "8"
-    memory: 20Gi
+    cpu: "6"
+    memory: 16Gi
   storage: 64Gi
