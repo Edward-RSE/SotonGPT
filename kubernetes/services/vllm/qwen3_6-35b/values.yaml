@@ -27,7 +27,7 @@ vllmArgs:
   - float16
   # Parallelism
   - --tensor-parallel-size
-  - "4"
+  - "2"
   # Memory
   - --gpu-memory-utilization
   - "0.90"
@@ -64,11 +64,11 @@ vllmLogLevel: INFO
 # small- to mid-sized models
 resources:
   limits:
-    gpu: "4"
+    gpu: "2"
     cpu: "12"
     memory: 32Gi
   requests:
-    gpu: "4"
+    gpu: "2"
     cpu: "6"
     memory: 16Gi
   storage: 64Gi
