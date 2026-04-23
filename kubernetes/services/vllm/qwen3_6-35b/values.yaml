@@ -13,7 +13,7 @@ model:
 # OPTIONAL — sensible defaults, override only when needed
 # ---------------------------------------------------------------------------
 namespace: sotongpt
-numReplicas: 1
+numReplicas: "1"
 
 # Free-form vLLM CLI args — append anything the vLLM docs support.
 # The model ID is always prepended automatically, do not repeat it here
