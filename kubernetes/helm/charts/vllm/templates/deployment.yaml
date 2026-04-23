@@ -21,6 +21,7 @@ spec:
     metadata:
       labels:
         app: vllm-{{ .Values.model.name }}
+        monitoring: vllm
     spec:
       volumes:
         - name: cache
