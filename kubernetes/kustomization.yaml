@@ -5,6 +5,7 @@ resources:
 - storage
 - monitoring
 - services
+- services/vllm/secrets.yaml
 labels:
 - includeSelectors: true
   pairs:
