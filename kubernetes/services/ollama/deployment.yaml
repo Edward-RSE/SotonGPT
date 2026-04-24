@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama-deployment
+  name: ollama
   namespace: sotongpt
   labels:
     app: ollama
@@ -33,4 +33,4 @@ spec:
       volumes:
         - name: ollama-storage
           persistentVolumeClaim:
-            claimName: ollama-pvc
+            claimName: ollama

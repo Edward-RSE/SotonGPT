@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: redis-valkey-pv
+  name: redis-valkey
 spec:
   storageClassName: manual
   claimRef:
-    name: redis-valkey-pvc
+    name: redis-valkey
     namespace: sotongpt
   capacity:
     storage: 5Gi

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: redis-valkey-pvc
+  name: redis-valkey
   namespace: sotongpt
 spec:
   accessModes:

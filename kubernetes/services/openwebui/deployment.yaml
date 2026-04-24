@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openwebui-deployment
+  name: openwebui
   namespace: sotongpt
   labels:
     app: openwebui
@@ -38,7 +38,7 @@ spec:
             - secretRef:
                 name: hf-token-secret
             - configMapRef:
-                name: openwebui-config
+                name: openwebui
           # The env variables in here use references to secrets and other config maps
           # so have to be here. Additional env variables are in the openwebui config
           # map
@@ -51,7 +51,7 @@ spec:
                   key: WEBUI_SECRET_KEY
             # Migrations should only be enabled on one replica
             - name: ENABLE_DB_MIGRATIONS
-              value: "False"
+              value: "True"
             # Configure Redis connection
             - name: REDIS_PASSWORD
               valueFrom:
@@ -59,9 +59,9 @@ spec:
                   name: redis-secret
                   key: REDIS_PASSWORD
             - name: REDIS_URL
-              value: redis://:$(REDIS_PASSWORD)@redis-valkey-service:6379/0
+              value: redis://:$(REDIS_PASSWORD)@redis-valkey:6379/0
             - name: WEBSOCKET_REDIS_URL
-              value: redis://:$(REDIS_PASSWORD)@redis-valkey-service:6379/1
+              value: redis://:$(REDIS_PASSWORD)@redis-valkey:6379/1
             # Configure postgres database connection
             - name: POSTGRES_USER
               valueFrom:
@@ -79,7 +79,7 @@ spec:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: DATABASE_URL
-              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)
+              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
           resources:
             requests:
               cpu: 4
@@ -93,4 +93,4 @@ spec:
       volumes:
         - name: openwebui-storage
           persistentVolumeClaim:
-            claimName: openwebui-pvc
+            claimName: openwebui

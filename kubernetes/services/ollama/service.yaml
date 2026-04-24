@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ollama-service
+  name: ollama
   namespace: sotongpt
   labels:
     app: ollama
