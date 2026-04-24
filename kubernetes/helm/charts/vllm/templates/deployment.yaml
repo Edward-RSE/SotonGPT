@@ -26,7 +26,7 @@ spec:
       volumes:
         - name: cache
           persistentVolumeClaim:
-            claimName: vllm-{{ .Values.model.name }}-pvc
+            claimName: vllm-{{ .Values.model.name }}
         - name: shm
           emptyDir:
             medium: Memory
@@ -50,8 +50,6 @@ spec:
               value: "1"
             - name: VLLM_ENGINE_READY_TIMEOUT_S
               value: "1200"
-            - name: VLLM_SLEEP_WHEN_IDLE
-              value: "1"
           resources:
             limits:
               nvidia.com/gpu: {{ .Values.resources.limits.gpu }}

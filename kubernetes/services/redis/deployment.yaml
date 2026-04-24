@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis-valkey-deployment
+  name: redis-valkey
   namespace: sotongpt
   labels:
     app: redis-valkey
@@ -70,4 +70,4 @@ spec:
       volumes:
         - name: lv-storage
           persistentVolumeClaim:
-            claimName: redis-valkey-pvc
+            claimName: redis-valkey

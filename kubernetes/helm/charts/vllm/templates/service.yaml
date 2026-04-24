@@ -4,7 +4,7 @@ metadata:
   name: vllm-{{ .Values.model.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: vllm
+    app: vllm-{{ .Values.model.name }}
 spec:
   type: ClusterIP
   selector:
