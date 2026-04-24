@@ -23,11 +23,11 @@ spec:
             [
               "sh",
               "-c",
-              "until nc -z postgres-service 5432; do echo waiting; sleep 2; done;",
+              "until nc -z postgres 5432; do echo waiting; sleep 2; done;",
             ]
       containers:
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:v0.9.1
+          image: ghcr.io/open-webui/open-webui:v0.9.2
           ports:
             - containerPort: 8080
           envFrom:
@@ -66,12 +66,12 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
-                  name: postgres-config
+                  name: postgres
                   key: POSTGRES_USER
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
-                  name: postgres-config
+                  name: postgres
                   key: POSTGRES_DB
             - name: POSTGRES_PASSWORD
               valueFrom:
