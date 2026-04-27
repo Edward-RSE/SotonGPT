@@ -3,6 +3,8 @@ kind: Job
 metadata:
   name: ollama-model-loader
   namespace: sotongpt
+  labels:
+    app: ollama
 spec:
   template:
     spec:
