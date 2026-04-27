@@ -20,6 +20,11 @@ spec:
           image: ollama/ollama:0.15.4
           ports:
             - containerPort: 11434
+          env:
+            - name: CUDA_VISIBLE_DEVICES
+              value: ""
+            - name: OLLAMA_NUM_GPU
+              value: "0"
           resources:
             requests:
               cpu: 4
