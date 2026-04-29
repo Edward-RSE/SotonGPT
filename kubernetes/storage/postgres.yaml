@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: postgres
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   claimRef:
     name: postgres
     namespace: sotongpt
@@ -11,6 +11,13 @@ spec:
     storage: 128Gi
   accessModes:
     - ReadWriteMany
-  hostPath:
+  local:
     path: /opt/sotongpt-data/postgresql
-    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - srv04885

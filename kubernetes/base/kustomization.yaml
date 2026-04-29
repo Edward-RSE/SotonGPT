@@ -2,4 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - manual-storage-class.yaml
+  - manual-storage.yaml
+  - local-storage.yaml
