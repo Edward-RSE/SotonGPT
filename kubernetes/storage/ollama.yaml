@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: ollama
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   claimRef:
     name: ollama
     namespace: sotongpt
@@ -11,6 +11,13 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
+  local:
     path: /opt/sotongpt-data/ollama
-    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - srv04885

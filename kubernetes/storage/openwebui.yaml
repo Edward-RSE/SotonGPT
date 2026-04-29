@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: openwebui
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   claimRef:
     name: openwebui
     namespace: sotongpt
@@ -11,6 +11,13 @@ spec:
     storage: 32Gi
   accessModes:
     - ReadWriteMany
-  hostPath:
-    path: /opt/sotongpt-data/openwebui-data
-    type: DirectoryOrCreate
+  local:
+    path: /opt/sotongpt-data/openwebui
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - srv04885

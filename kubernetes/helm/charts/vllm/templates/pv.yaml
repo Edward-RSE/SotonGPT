@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: vllm-{{ .Values.model.name }}
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   claimRef:
     name: vllm-{{ .Values.model.name }}
     namespace: {{ .Values.namespace }}
@@ -11,6 +11,13 @@ spec:
     storage: {{ .Values.resources.storage }}
   accessModes:
     - ReadWriteMany
-  hostPath:
+  local:
     path: {{ .Values.model.hostPath }}
-    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - srv04885

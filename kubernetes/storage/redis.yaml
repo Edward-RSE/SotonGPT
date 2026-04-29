@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: redis-valkey
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   claimRef:
     name: redis-valkey
     namespace: sotongpt
@@ -11,6 +11,13 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
+  local:
     path: /opt/sotongpt-data/redis-valkey
-    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - srv04885
