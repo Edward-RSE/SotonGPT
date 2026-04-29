@@ -4,7 +4,7 @@ metadata:
   name: openwebui
   namespace: sotongpt
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   accessModes:
     - ReadWriteMany
   resources:
