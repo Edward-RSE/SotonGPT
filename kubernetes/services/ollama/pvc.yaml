@@ -4,7 +4,7 @@ metadata:
   name: ollama
   namespace: sotongpt
 spec:
-  storageClassName: manual
+  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:
