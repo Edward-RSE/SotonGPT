@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# REQUIRED — must be provided at install time, no defaults
+# ---------------------------------------------------------------------------
+model:
+  # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
+  name: qwen3-6-35b-non-reasoning
+  # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
+  id: QuantTrio/Qwen3.6-35B-A3B-AWQ
+  # Path to the directory, on the host, where model weights will be kept
+  hostPath: /home/ejp1v21/sotongpt-models/vllm/qwen3_6-35b
+
+# ---------------------------------------------------------------------------
+# OPTIONAL — sensible defaults, override only when needed
+# ---------------------------------------------------------------------------
+namespace: sotongpt
+numReplicas: "1"
+
+# Free-form vLLM CLI args — append anything the vLLM docs support.
+# The model ID is always prepended automatically, do not repeat it here
+vllmArgs:
+  # Model identity
+  - --served-model-name
+  - qwen3-6-35b-non-reasoning
+  - --quantization
+  - awq_marlin
+  - --dtype
+  - float16
+  # Parallelism
+  - --tensor-parallel-size
+  - "2"
+  # Memory
+  - --gpu-memory-utilization
+  - "0.90"
+  - --kv-cache-dtype
+  - auto
+  # Context & batching
+  - --max-model-len
+  - "131072"
+  - --max-num-batched-tokens
+  - "32768"
+  - --max-num-seqs
+  - "64"
+  # Optimisations
+  - --enable-chunked-prefill
+  - --enable-prefix-caching
+  - --speculative-config
+  - '{"method":"qwen3_next_mtp","num_speculative_tokens":2}'
+  # Reasoning & tools
+  - --default-chat-template-kwargs 
+  - '{"enable_thinking": false}'
+  - --enable-auto-tool-choice
+  - --tool-call-parser
+  - qwen3_coder
+  # Network
+  - --host
+  - 0.0.0.0
+  - --port
+  - "8000"
+
+# vLLM logging level
+vllmLogLevel: INFO
+
+# Resource requirements for pods. These values are probably sensible for most
+# small- to mid-sized models
+resources:
+  limits:
+    gpu: "2"
+    cpu: "12"
+    memory: 32Gi
+  requests:
+    gpu: "2"
+    cpu: "6"
+    memory: 16Gi
+  storage: 64Gi

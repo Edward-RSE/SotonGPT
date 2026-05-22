@@ -15,7 +15,8 @@ spec:
       labels:
         app: openwebui
     spec:
-      # main container won't start if a postgres connection cannot be made
+      # main container won't start if a postgres connection cannot be made or if
+      # the pipelines container isn't working
       initContainers:
         - name: wait-for-postgres
           image: busybox
@@ -26,8 +27,9 @@ spec:
               "until nc -z postgres 5432; do echo waiting; sleep 2; done;",
             ]
       containers:
+        # Core service container, which runs Open WebUI
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:v0.9.2
+          image: ghcr.io/open-webui/open-webui:v0.9.4
           ports:
             - containerPort: 8080
           envFrom:
@@ -87,10 +89,64 @@ spec:
             limits:
               cpu: 4
               memory: 4Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 5
           volumeMounts:
             - name: openwebui-storage
               mountPath: /app/backend/data
+        # Container where Open WebUI's pipelines run
+        - name: openwebui-pipelines
+          image: ghcr.io/open-webui/pipelines:git-039f9c5
+          ports:
+            - containerPort: 9099
+          env:
+            - name: GLOBAL_LOG_LEVEL
+              value: DEBUG
+          #   - name: PIPELINES_API_KEY
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: openwebui-secret
+          #         key: PIPELINES_API_KEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9099
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9099
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 5
+          volumeMounts:
+            - name: pipelines-storage
+              mountPath: /app/pipelines
       volumes:
         - name: openwebui-storage
           persistentVolumeClaim:
             claimName: openwebui
+        - name: pipelines-storage
+          persistentVolumeClaim:
+            claimName: openwebui-pipelines
