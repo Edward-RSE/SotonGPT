@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: openwebui-pipelines
+spec:
+  storageClassName: local-storage
+  claimRef:
+    name: openwebui-pipelines
+    namespace: sotongpt
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  local:
+    path: /opt/sotongpt/pipelines
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - srv04885
