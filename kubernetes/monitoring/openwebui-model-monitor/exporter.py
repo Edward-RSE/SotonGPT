@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+
+import json
+import logging
+import os
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.request import Request, urlopen
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
+API_URL = os.getenv("API_URL", "http://sotongpt.soton.ac.uk/api/models")
+SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL", "60"))  # seconds
+API_TIMEOUT = int(os.getenv("API_TIMEOUT", "10"))  # seconds
+API_KEY = os.getenv("API_KEY")
+
+if not API_KEY:
+    raise ValueError("API key required for SotonGPT")
+
+state = {
+    "model_count": 0,
+    "up": 0,  # 1 = last scrape succeeded, 0 = failed
+    "scrape_duration": 0.0,
+    "last_scrape_ts": 0.0,
+}
+lock = threading.Lock()
+
+
+def scrape():
+    headers = {"Accept": "application/json"}
+    headers["Authorization"] = f"Bearer {API_KEY}"
+
+    while True:
+        t0 = time.time()
+
+        try:
+            req = Request(API_URL, headers=headers)
+            with urlopen(req, timeout=API_TIMEOUT) as resp:
+                raw = resp.read()
+                data = json.loads(raw)
+            if isinstance(data, dict):
+                models = data.get("data", [])
+            elif isinstance(data, list):
+                models = data
+            else:
+                models = []
+            count = len(models)
+            logger.info("Fetched %d model(s) from %s", count, API_URL)
+            with lock:
+                state["model_count"] = count
+                state["up"] = 1
+                state["scrape_duration"] = time.time() - t0
+                state["last_scrape_ts"] = time.time()
+        except Exception as exc:
+            logger.error("Scrape failed: %s", exc)
+            with lock:
+                state["up"] = 0
+                state["scrape_duration"] = time.time() - t0
+                state["last_scrape_ts"] = time.time()
+
+        time.sleep(SCRAPE_INTERVAL)
+
+
+HELP = {
+    "sotongpt_models_available": "# HELP sotongpt_models_available Number of models returned by the Open WebUI API\n"
+    "# TYPE sotongpt_models_available gauge\n",
+    "sotongpt_up": "# HELP sotongpt_up Whether the last scrape of the Open WebUI API succeeded (1=yes, 0=no)\n"
+    "# TYPE sotongpt_up gauge\n",
+    "sotongpt_scrape_duration_seconds": "# HELP sotongpt_scrape_duration_seconds Duration of the last API scrape in seconds\n"
+    "# TYPE sotongpt_scrape_duration_seconds gauge\n",
+    "sotongpt_last_scrape_timestamp_seconds": "# HELP sotongpt_last_scrape_timestamp_seconds Unix timestamp of the last scrape attempt\n"
+    "# TYPE sotongpt_last_scrape_timestamp_seconds gauge\n",
+}
+
+
+class MetricsHandler(BaseHTTPRequestHandler):
+    def log_message(self, fmt, *args):  # silence default access log
+        pass
+
+    def do_GET(self):
+        if self.path not in ("/metrics", "/metrics/"):
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        with lock:
+            s = dict(state)
+
+        lines = []
+        lines.append(HELP["sotongpt_models_available"])
+        lines.append(f"sotongpt_models_available {s['model_count']}\n")
+        lines.append(HELP["sotongpt_up"])
+        lines.append(f"sotongpt_up {s['up']}\n")
+        lines.append(HELP["sotongpt_scrape_duration_seconds"])
+        lines.append(f"sotongpt_scrape_duration_seconds {s['scrape_duration']:.4f}\n")
+        lines.append(HELP["sotongpt_last_scrape_timestamp_seconds"])
+        lines.append(
+            f"sotongpt_last_scrape_timestamp_seconds {s['last_scrape_ts']:.3f}\n"
+        )
+
+        body = "".join(lines).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+
+if __name__ == "__main__":
+    t = threading.Thread(target=scrape, daemon=True)
+    t.start()
+    logger.info("Starting metrics server on :8000")
+    HTTPServer(("0.0.0.0", 8000), MetricsHandler).serve_forever()

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sotongpt-model-monitor
+  namespace: sotongpt
+  labels:
+    app: sotongpt-model-monitor
+spec:
+  selector:
+    app: sotongpt-model-monitor
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: 8000
+

@@ -1,0 +1,45 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sotongpt-model-monitor-alerts
+  namespace: sotongpt
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: sotongpt
+      interval: 60s
+      rules:
+        # Alert: API returned zero models
+        - alert: SotonGPTNoModelsAvailable
+          expr: sotongpt_models_available == 0
+          for: 2m        # must be zero for 2 minutes before firing
+          labels:
+            severity: critical
+          annotations:
+            summary: "Open WebUI reports no available models"
+            description: >
+              The Open WebUI API at sotongpt.soton.ac.uk/api/models has returned
+              zero models for more than 2 minutes. Users cannot make requests.
+        # Alert: exporter itself cannot reach the API
+        - alert: SotonGPTAPIUnreachable
+          expr: sotongpt_up == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Open WebUI API is unreachable"
+            description: >
+              The exporter has been unable to contact sotongpt.soton.ac.uk/api/models
+              for more than 2 minutes. Check network connectivity or API availability.
+        # Warning: model count has dropped (tune the threshold to suit)
+        - alert: SotonGPTLowModelCount
+          expr: sotongpt_models_available < 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Open WebUI has fewer models than expected ({{ $value }} available)"
+            description: >
+              Only {{ $value }} model(s) are being returned by the API.
+              This may indicate partial service degradation.
