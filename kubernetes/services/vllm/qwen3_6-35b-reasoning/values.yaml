@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 model:
   # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
-  name: qwen3-6-35b
+  name: qwen3-6-35b-reasoning
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: QuantTrio/Qwen3.6-35B-A3B-AWQ
   # Path to the directory, on the host, where model weights will be kept
@@ -20,7 +20,7 @@ numReplicas: "1"
 vllmArgs:
   # Model identity
   - --served-model-name
-  - qwen3-6-35b
+  - qwen3-6-35b-reasoning
   - --quantization
   - awq_marlin
   - --dtype
