@@ -77,7 +77,7 @@ tuna==0.5.11
 typing_extensions==4.6.1
 urllib3==1.26.12
 wcwidth==0.2.5
-Werkzeug==3.1.5
+Werkzeug==3.1.6
 zipp==3.10.0
 zope.event==6.0
 zope.interface==8.0.1
