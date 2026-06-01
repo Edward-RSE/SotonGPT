@@ -30,4 +30,3 @@ The `services` directory houses the core application components.
 TODO: this need finishing
 
 ![Deployment diagram](deployment_diagram.png)
-

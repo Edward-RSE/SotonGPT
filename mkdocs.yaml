@@ -1,0 +1,15 @@
+site_name: SotonGPT
+site_description: Documentation for SotonGPT
+docs_dir: docs/website
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - content.code.copy
+
+nav:
+  - Home: index.md
