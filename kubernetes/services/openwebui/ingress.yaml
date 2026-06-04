@@ -4,6 +4,10 @@ metadata:
   name: openwebui
   namespace: sotongpt
 spec:
+  tls:
+    - hosts:
+      - sotongpt.soton.ac.uk
+      secretName: srv04885-tls
   rules:
     - host: sotongpt.soton.ac.uk
       http:

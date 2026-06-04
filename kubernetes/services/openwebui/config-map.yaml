@@ -7,11 +7,11 @@ metadata:
     app: openwebui
 data:
   # URL the service is available at
-  WEBUI_URL: "http://sotongpt.soton.ac.uk"
-  CORS_ALLOW_ORIGIN: "http://sotongpt.soton.ac.uk"
+  WEBUI_URL: "https://sotongpt.soton.ac.uk"
+  CORS_ALLOW_ORIGIN: "https://sotongpt.soton.ac.uk"
   # Set the following to false when using http
-  WEBUI_SESSION_COOKIE_SECURE: "False"
-  WEBUI_AUTH_COOKIE_SECURE: "False"
+  WEBUI_SESSION_COOKIE_SECURE: "True"
+  WEBUI_AUTH_COOKIE_SECURE: "True"
   # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
   UVICORN_WORKERS: "4"
   # Set thread pool size for AnyIO blocking calls. If too low, the web page will
