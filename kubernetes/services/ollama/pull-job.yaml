@@ -27,5 +27,9 @@ spec:
           curl -X POST http://ollama:11434/api/pull \
             -H "Content-Type: application/json" \
             -d '{"name": "nomic-embed-text"}'
+
+          curl -X POST http://ollama:11434/api/pull \
+            -H "Content-Type: application/json" \
+            -d '{"name": "qllama/bge-reranker-v2-m3"}'
       restartPolicy: OnFailure
   backoffLimit: 3
