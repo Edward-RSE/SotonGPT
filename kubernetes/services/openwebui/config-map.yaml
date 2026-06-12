@@ -50,7 +50,7 @@ data:
   ENABLE_OAUTH_SIGNUP: "True"
   OAUTH_SCOPES: openid email profile
   OAUTH_CLIENT_ID: "d5da2906-ec2e-4a9d-963d-95fd5dee096c"
-  OAUTH_CLIENT_SECRET: "REDACTED"
+  OAUTH_CLIENT_SECRET: ""
   OPENID_PROVIDER_URL: "https://login.microsoftonline.com/4a5378f9-29f4-4d3e-be89-669d03ada9d8/v2.0/.well-known/openid-configuration"
   OAUTH_PROVIDER_NAME: "University of Southampton"
   OPENID_REDIRECT_URI: "https://sotongpt.soton.ac.uk/oauth/oidc/callback"
