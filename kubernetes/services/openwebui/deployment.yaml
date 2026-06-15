@@ -51,6 +51,12 @@ spec:
                 secretKeyRef:
                   name: openwebui-secret
                   key: WEBUI_SECRET_KEY
+            # Secret for Oauth SSO
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secret
+                  key: OAUTH_CLIENT_ID
             # Migrations should only be enabled on one replica
             - name: ENABLE_DB_MIGRATIONS
               value: "True"
