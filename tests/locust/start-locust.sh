@@ -3,9 +3,7 @@
 source venv/bin/activate
 locust \
 	--headless \
-    --users 128 \
+    --users 64 \
     --spawn-rate 1 \
-    --run-time 6h \
-    --print-stats \
-    --html "locust-stats.html" \
-    --host http://sotongpt.soton.ac.uk
+    --run-time 1h \
+    --host https://sotongpt.soton.ac.uk
