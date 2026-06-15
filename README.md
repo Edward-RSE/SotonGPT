@@ -1,6 +1,6 @@
 # SotonGPT
 
-This is a repository containing the files used to deploy SotonGPT. Note that GPUs are required to deploy SotonGPT 
+This is a repository containing the files used to deploy SotonGPT. Note that GPUs are required to deploy SotonGPT
 using both Docker and Kubernetes.
 
 On the SotonGPT host machine, this repository has been cloned to `/opt/sotongpt-k8s`.
@@ -365,3 +365,36 @@ host and have acceptable interactive token throughput:
 - Qwen2.5 14B Instruct
 - Qwen2.5 32B Instruct
 - Qwen3 32B
+
+## Nvidia driver and Cuda Toolkit installation
+
+ From version 13.3 Cuda requires version =< 610.43.02 which at the time of writing is only available with Open Kernel Modules, which Nvidia now recommend anyway.
+Instructions are available here:
+ https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/red-hat-enterprise-linux.html#rhel-installation
+1 - Install the driver and Open Kernel Modules:
+ sudo bash
+ arch= x86_64
+ export arch
+ distro=rhel9
+ export distro
+
+ dnf install kernel-devel-matched kernel-headers
+ subscription-manager repos --enable=rhel-9-for-$arch-appstream-rpms
+ subscription-manager repos --enable=rhel-9-for-$arch-baseos-rpms
+ subscription-manager repos --enable=codeready-builder-for-rhel-9-$arch-rpms
+ dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+
+ dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-$distro.repo
+dnf clean expire-cache
+ dnf module enable nvidia-driver:open-dkms
+ dnf install nvidia-open
+
+ reboot
+2 -Once the system has restarted install the latest version of the Cuda Toolkit:
+ dnd install cuda-toolkit
+
+3 – Check all is well with:
+ nvidia-smi
+
+4 - NOTE - The first soton-gpt server (srv04885) is currently using CUDA 13.0 and the Propitiatory Kernel Modules with
+version 580 of the Nvidia driver
