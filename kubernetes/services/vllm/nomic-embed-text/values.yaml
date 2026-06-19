@@ -1,0 +1,49 @@
+
+# ---------------------------------------------------------------------------
+# REQUIRED — must be provided at install time, no defaults
+# ---------------------------------------------------------------------------
+hostNode: srv04968
+model:
+  # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
+  name: nomic-embed-text
+  # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
+  id: nomic-ai/nomic-embed-text-v1
+  # Path to the directory, on the host, where model weights will be kept
+  hostPath: /home/ejp1v21/sotongpt-models/vllm/nomic-embed-text
+
+# ---------------------------------------------------------------------------
+# OPTIONAL — sensible defaults, override only when needed
+# ---------------------------------------------------------------------------
+namespace: sotongpt
+numReplicas: "1"
+
+# Free-form vLLM CLI args — append anything the vLLM docs support.
+# The model ID is always prepended automatically, do not repeat it here
+vllmArgs:
+  # Model identity
+  - "--served-model-name"
+  - "nomic-embed-text"
+  - "--trust-remote-code"
+  - "--max-model-len"
+  - "8192"
+  - "--max-num-batched-tokens"
+  - "8192"
+  - "--enforce-eager"
+  # Network
+  - --host
+  - 0.0.0.0
+  - --port
+  - "8000"
+
+# Resource requirements for pods. These values are probably sensible for most
+# small- to mid-sized models
+resources:
+  limits:
+    gpu: "1"
+    cpu: "4"
+    memory: 8Gi
+  requests:
+    gpu: "1"
+    cpu: "2"
+    memory: 4Gi
+  storage: 6Gi
