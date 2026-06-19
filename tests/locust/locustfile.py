@@ -12,11 +12,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-SOTONGPT_TOKEN_USER = os.getenv("SOTONGPT_TOKEN_USER", "")
-if not SOTONGPT_TOKEN_USER:
-    raise EnvironmentError("SOTONGPT_TOKEN_USER environment variable is not set")
+SOTONGPT_TOKEN = os.getenv("SOTONGPT_TOKEN", "")
+if not SOTONGPT_TOKEN:
+    raise EnvironmentError("SOTONGPT_TOKEN environment variable is not set")
 
-REQUEST_HEADERS = {"Authorization": f"Bearer {SOTONGPT_TOKEN_USER}"}
+REQUEST_HEADERS = {"Authorization": f"Bearer {SOTONGPT_TOKEN}"}
 MAX_TIMEOUT = 1800  # 30 minutes for really long prompts
 CHAT_COMPLETION_PROMPTS = [
     # Short / simple
@@ -70,35 +70,26 @@ class Model:
 
 
 class User(HttpUser):
-    """Locust user class for load testing SotonGPT.
+    """Locust user class for load testing SotonGPT."""
 
-    On startup, available models are fetched from the API along with their
-    maximum context lengths. Each virtual user waits between 5 and 60 seconds
-    between tasks to simulate realistic human interaction. All requests time
-    out after 300 seconds.
-
-    Uses the OpenAI compatible endpoints, which will also cover the 'regular'
-    Open WebUI endpoints.
-    """
-
-    # Simulate realistic human think-time between tasks
-    wait_time = between(5, 60)
+    wait_time = between(5, 15)
 
     def _fetch_models(self) -> list[Model]:
-        """Fetch available models from the API endpoint.
-
-        Returns
-        -------
-        list[Model]
-            A list of models available on the API to normal users.
-
-        """
+        """Fetch available models from the API endpoint."""
         response = self.client.get(
             "/api/v1/models",
             headers={**REQUEST_HEADERS, "Content-Type": "application/json"},
             timeout=MAX_TIMEOUT,
         )
-        response_data = response.json()
+
+        try:
+            response_data = response.json()
+        except ValueError:
+            logger.error(
+                f"Failed to parse JSON from /api/v1/models. Status: {response.status_code}, Response: {response.text}"
+            )
+            raise ValueError("Invalid JSON response from models API")
+
         logger.debug(
             f"/api/v1/models[response]: {response.status_code} {response_data}"
         )
@@ -112,19 +103,13 @@ class User(HttpUser):
         base_models = {}
         pending_models = []
 
-        # Get all the models in the API. Some models will not have a max_model_len
-        # as they are not "base" models, e.g. they are thin wrappers, created
-        # in the OpenWeb UI interface, around a "base" models served by vLLM.
-        # These "thin models" tend to have easier to use model ids or have a limited
-        # set of features compared to the base model. These are the "pending_models".
-        # We need to first find the base models they are based on, so we can determine
-        # the max model length. This is not returned by the API for some reason for
-        # the thin models.
         for model in model_data:
             logger.debug("Populating model: %s", model)
             if model["owned_by"] != "openai" or model["connection_type"] != "local":
                 continue
             info = model["info"]
+            if model["id"] in ["nomic-embed-text", "bge-reranker"]:
+                continue
             if model.get("preset", False):
                 pending_models.append(
                     Model(name=model["id"], length=0, base_model=info["base_model_id"])
@@ -148,6 +133,7 @@ class User(HttpUser):
             Model(model.name, base_models[model.base_model].length, model.base_model)
             for model in pending_models
         ] + list(base_models.values())
+
         if len(avail_models) == 0:
             raise ValueError("There are no available LLMs")
 
@@ -156,40 +142,15 @@ class User(HttpUser):
         return avail_models
 
     def _pick_model(self) -> Model:
-        """Return a randomly selected model.
-
-        Returns
-        -------
-        Model
-            A Model dataclass describing the model picked
-
-        """
+        """Return a randomly selected model."""
         return random.choice(self.models)
 
     def _pick_file(self) -> str:
-        """Returns a randomly selected file.
-
-        Returns
-        -------
-        str
-            The file path to the file.
-        """
+        """Returns a randomly selected file."""
         return random.choice(CHAT_COMPLETION_FILES)
 
     def _post_chat_completion(self, payload: dict) -> dict[str, Any]:
-        """Send a chat completion request to the API.
-
-        Parameters
-        ----------
-        payload : dict
-            The request body to send to /api/v1/chat/completions.
-
-        Returns
-        -------
-        dict[str, str]
-            The response from the API as a JSON.
-
-        """
+        """Send a chat completion request to the API."""
         logger.debug(f"Sending request to Chat Completion with payload: {payload}")
         response = self.client.post(
             "/api/v1/chat/completions",
@@ -199,8 +160,21 @@ class User(HttpUser):
             name=f"/api/v1/chat/completions[{payload['model']}]",
         )
 
-        response_json = response.json()
-        logger.debug(f"Chat Completions response: {response_json['choices']}")
+        try:
+            response_json = response.json()
+        except ValueError:
+            logger.error(
+                f"Chat completion failed to parse JSON. Status: {response.status_code}, Response: {response.text}"
+            )
+            raise ValueError("Invalid JSON response from chat completions API")
+
+        if response.status_code != 200:
+            logger.error(
+                f"Chat completion failed. Status: {response.status_code}, Response: {response.text}"
+            )
+            raise ValueError(f"Chat completion returned status {response.status_code}")
+
+        logger.debug(f"Chat Completions response: {response_json.get('choices', [])}")
         tokens = response_json.get("usage", {}).get("total_tokens", "unknown")
         time = response.elapsed.total_seconds()
         logger.info(
@@ -223,19 +197,7 @@ class User(HttpUser):
         )
 
     def _upload_file(self, file_path: str) -> str:
-        """Upload a file and return its ID.
-
-        Parameters
-        ----------
-        file_path : str
-            Path to the file to upload.
-
-        Returns
-        -------
-        str
-            The ID of the file.
-
-        """
+        """Upload a file and return its ID."""
         with open(file_path, "rb") as f:
             filename = os.path.basename(file_path)
 
@@ -246,8 +208,19 @@ class User(HttpUser):
                 timeout=MAX_TIMEOUT,
             )
 
-        file_id = response.json().get("id")
+        try:
+            response_json = response.json()
+        except ValueError:
+            logger.error(
+                f"File upload failed to parse JSON. Status: {response.status_code}, Response: {response.text}"
+            )
+            raise ValueError("Invalid JSON response from file upload API")
+
+        file_id = response_json.get("id")
         if not file_id:
+            logger.error(
+                f"File upload response missing ID. Status: {response.status_code}, Response: {response.text}"
+            )
             raise ValueError("File upload response did not contain a file ID")
 
         logger.debug("Uploaded file %s with ID %s", filename, file_id)
@@ -255,14 +228,7 @@ class User(HttpUser):
         return file_id
 
     def _delete_file(self, file_id: str) -> None:
-        """Delete a previously uploaded file.
-
-        Parameters
-        ----------
-        file_id : str
-            The ID of the file to delete.
-
-        """
+        """Delete a previously uploaded file."""
         self.client.delete(
             f"/api/v1/files/{file_id}",
             headers=REQUEST_HEADERS,
@@ -275,13 +241,7 @@ class User(HttpUser):
     ############################################################################
 
     def on_start(self) -> None:
-        """Start-up tasks.
-
-        1. Fetch available user-facing models.
-
-        If model fetching fails, the runner is stopped to surface the error
-        clearly rather than allowing the user to proceed with no models.
-        """
+        """Start-up tasks."""
         try:
             self.models = self._fetch_models()
         except Exception as e:
@@ -298,10 +258,7 @@ class User(HttpUser):
         """Check the health endpoint."""
         self.client.get("/health", headers=REQUEST_HEADERS)
 
-    ############################################################################
-    # Medium weight tasks
-
-    @task(5)
+    @task(1)
     def check_models(self) -> None:
         """Check the models endpoint."""
         self.client.get(
@@ -324,7 +281,10 @@ class User(HttpUser):
             ],
             "temperature": random.uniform(0.1, 1.0),
         }
-        self._post_chat_completion(payload)
+        try:
+            self._post_chat_completion(payload)
+        except ValueError:
+            pass  # Caught and logged in _post_chat_completion
 
     @task(10)
     def send_conversation_chat_completion(self) -> None:
@@ -335,9 +295,14 @@ class User(HttpUser):
             "temperature": random.uniform(0.1, 1.0),
         }
 
-        response = self._post_chat_completion(payload)
+        try:
+            response = self._post_chat_completion(payload)
+        except ValueError:
+            self._reset_long_conversation()
+            return
+
         message = response["choices"][0]["message"]
-        usage = response["usage"]["total_tokens"]
+        usage = response.get("usage", {}).get("total_tokens", 0)
 
         # subtract 1024 from the model length as a safety margin
         if usage < self._conv_model.length - self._conv_cut_length:
@@ -351,7 +316,11 @@ class User(HttpUser):
         model = self._pick_model()
         file_path = self._pick_file()
 
-        file_id = self._upload_file(file_path)
+        try:
+            file_id = self._upload_file(file_path)
+        except ValueError:
+            return
+
         payload = {
             "model": model.name,
             "messages": [
@@ -362,6 +331,8 @@ class User(HttpUser):
         }
         try:
             self._post_chat_completion(payload)
+        except ValueError:
+            pass
         finally:
             self._delete_file(file_id)
 
