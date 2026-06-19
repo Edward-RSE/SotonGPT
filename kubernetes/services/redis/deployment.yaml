@@ -22,22 +22,21 @@ spec:
             - --requirepass
             - $(REDIS_PASSWORD)
             - --appendonly
-            - yes
+            - "yes"
             - --appendfsync
             - everysec
             - --maxmemory
             - 3gb
             - --maxmemory-policy
-            - allkeys-lru
+            - noeviction
             - --protected-mode
-            - no
+            - "no"
             - --maxclients
             - "1000"
             - --timeout
-            - "1800"
+            - "0"
             - --save
-            - "30"
-            - "1"
+            - ""
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -58,13 +57,19 @@ spec:
               cpu: 2000m
               memory: 4Gi
           livenessProbe:
-            tcpSocket:
-              port: 6379
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping | grep PONG
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
-            tcpSocket:
-              port: 6379
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping | grep PONG
             initialDelaySeconds: 5
             periodSeconds: 5
       volumes:

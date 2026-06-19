@@ -16,6 +16,13 @@ spec:
       containers:
         - name: postgres
           image: pgvector/pgvector:pg17
+          args:
+            - "-c"
+            - "max_connections=256"
+            - "-c"
+            - "shared_buffers=1GB"
+            - "-c"
+            - "work_mem=8MB"
           ports:
             - containerPort: 5432
           env:
@@ -39,11 +46,11 @@ spec:
               name: postgresdata
           resources:
             requests:
-              cpu: 1
-              memory: 1Gi
+              cpu: 2
+              memory: 4Gi
             limits:
               cpu: 4
-              memory: 24Gi
+              memory: 8Gi
       volumes:
         - name: postgresdata
           persistentVolumeClaim:

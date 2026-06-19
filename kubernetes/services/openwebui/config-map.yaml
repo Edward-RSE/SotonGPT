@@ -11,6 +11,7 @@ data:
   CORS_ALLOW_ORIGIN: "https://sotongpt.soton.ac.uk"
   # Set the following to false when using http
   WEBUI_SESSION_COOKIE_SECURE: "True"
+  WEBUI_SESSION_COOKIE_SAME_SITE: "lax"
   WEBUI_AUTH_COOKIE_SECURE: "True"
   # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
   UVICORN_WORKERS: "4"
@@ -37,19 +38,46 @@ data:
   CHAT_RESPONSE_STREAM_DELTA_CHUNK_SIZE: "7"
   # Higher values increase the time-to-live of a model, reducing API calls to LLMs
   MODELS_CACHE_TTL: "150"
-  # The number of open connections to the database, both need to be kept under 100 when added together
-  DATABASE_POOL_SIZE: "15"
-  DATABASE_POOL_MAX_OVERFLOW: "20"
+  # The number of open connections to the database, both need to be kept under 256 when added together
+  DATABASE_POOL_SIZE: "64"
+  DATABASE_POOL_MAX_OVERFLOW: "128"
+  DATABASE_POOL_TIMEOUT: "30"
+  DATABASE_POOL_RECYCLE: "3600"
   # Disabling features which will not be used
   ENABLE_AUTOCOMPLETE_GENERATION: "False"
   ENABLE_FOLLOW_UP_GENERATION: "False"
   ENABLE_IMAGE_GENERATION: "False"
   ENABLE_CODE_INTERPRETER: "False"
+  ENABLE_CODE_EXECUTION: "False"
   # Non-sensitive variables to enable oauth
-  ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
+  ENABLE_OAUTH_PERSISTENT_CONFIG: "True"
   ENABLE_OAUTH_SIGNUP: "True"
   OAUTH_SCOPES: openid email profile
   OAUTH_CLIENT_ID: "d5da2906-ec2e-4a9d-963d-95fd5dee096c"
   OPENID_PROVIDER_URL: "https://login.microsoftonline.com/4a5378f9-29f4-4d3e-be89-669d03ada9d8/v2.0/.well-known/openid-configuration"
   OAUTH_PROVIDER_NAME: "University of Southampton"
   OPENID_REDIRECT_URI: "https://sotongpt.soton.ac.uk/oauth/oidc/callback"
+  OAUTH_ALLOWED_EMAIL_DOMAINS: "soton.ac.uk"
+  # Only allow logins with SSO
+  ENABLE_LOGIN_FORM: "False"
+  ENABLE_PASSWORD_AUTH: "False"
+  ENABLE_PASSWORD_CHANGE_FORM: "False"
+  ENABLE_SIGNUP: "False"  # belts and braces to stop signup outside of SSO
+  # These values are set to increase the security of the deployment
+  JWT_EXPIRES_IN: "24h"
+  ENABLE_COMMUNITY_SHARING: "False"
+  ENABLE_DIRECT_CONNECTIONS: "False"
+  USER_PERMISSIONS_FEATURES_API_KEYS: "True"
+  ENABLE_API_KEYS_ENDPOINT_RESTRICTIONS: "True"
+  API_KEYS_ALLOWED_ENDPOINTS: "/api/health,/api/v1/models,/v1/models,/api/chat/completions,/v1/chat/completions,/api/v1/files,/api/v1/files/{id},/api/v1/files/{id}/data/content,/api/v1/knowledge,/api/v1/knowledge/{id}"
+  ENABLE_OPENAI_API_PASSTHROUGH: "False"
+  USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS: "False"
+  USER_PERMISSIONS_WORKSPACE_TOOLS_IMPORT: "False"
+  USER_PERMISSIONS_WORKSPACE_SKILLS_ACCESS: "False"
+  # Audit logging, useful for recording API use
+  ENABLE_AUDIT_LOGS_FILE: "True"
+  AUDIT_LOG_LEVEL: "METADATA"
+  AUDIT_LOGS_FILE_PATH: "/app/backend/data/audit.log"
+  AUDIT_LOG_FILE_ROTATION_SIZE: "10MB"
+  ENABLE_AUDIT_STDOUT: "True"
+  MAX_BODY_LOG_SIZE: "2048"
