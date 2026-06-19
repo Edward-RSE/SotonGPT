@@ -4,9 +4,7 @@ metadata:
   name: vllm-{{ .Values.model.name }}
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: vllm-{{ .Values.model.name }}
-    namespace: {{ .Values.namespace }}
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: {{ .Values.resources.storage }}
   accessModes:

@@ -4,9 +4,7 @@ metadata:
   name: postgres
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: postgres
-    namespace: sotongpt
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: 128Gi
   accessModes:

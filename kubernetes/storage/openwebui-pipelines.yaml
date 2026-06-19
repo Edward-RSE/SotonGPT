@@ -4,9 +4,7 @@ metadata:
   name: openwebui-pipelines
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: openwebui-pipelines
-    namespace: sotongpt
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: 1Gi
   accessModes:

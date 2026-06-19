@@ -4,9 +4,7 @@ metadata:
   name: ollama
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: ollama
-    namespace: sotongpt
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: 10Gi
   accessModes:

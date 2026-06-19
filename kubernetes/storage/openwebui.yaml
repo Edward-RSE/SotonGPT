@@ -4,9 +4,7 @@ metadata:
   name: openwebui
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: openwebui
-    namespace: sotongpt
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: 32Gi
   accessModes:

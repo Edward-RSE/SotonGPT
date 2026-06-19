@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   storageClassName: local-storage
+  volumeName: vllm-{{ .Values.model.name }}
   accessModes:
     - ReadWriteMany
   resources:

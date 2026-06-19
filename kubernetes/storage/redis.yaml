@@ -4,9 +4,7 @@ metadata:
   name: redis-valkey
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: redis-valkey
-    namespace: sotongpt
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: 5Gi
   accessModes:
