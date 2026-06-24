@@ -9,6 +9,13 @@ data:
   # URL the service is available at
   WEBUI_URL: "https://sotongpt.soton.ac.uk"
   CORS_ALLOW_ORIGIN: "https://sotongpt.soton.ac.uk"
+  # Set to offline mode, which restricts Open WebUI from talking to the outside
+  # world
+  OFFLINE_MODE: "True"
+  HF_HUB_OFFLINE: "1"
+  RAG_EMBEDDING_MODEL_AUTO_UPDATE: "False"
+  RAG_RERANKING_MODEL_AUTO_UPDATE: "False"
+  WHISPER_MODEL_AUTO_UPDATE: "False"
   # Set the following to false when using http
   WEBUI_SESSION_COOKIE_SECURE: "True"
   WEBUI_SESSION_COOKIE_SAME_SITE: "lax"
@@ -39,8 +46,8 @@ data:
   # Higher values increase the time-to-live of a model, reducing API calls to LLMs
   MODELS_CACHE_TTL: "150"
   # The number of open connections to the database, both need to be kept under 256 when added together
-  DATABASE_POOL_SIZE: "64"
-  DATABASE_POOL_MAX_OVERFLOW: "128"
+  DATABASE_POOL_SIZE: "32"
+  DATABASE_POOL_MAX_OVERFLOW: "64"
   DATABASE_POOL_TIMEOUT: "30"
   DATABASE_POOL_RECYCLE: "3600"
   # Disabling features which will not be used
@@ -81,3 +88,13 @@ data:
   AUDIT_LOG_FILE_ROTATION_SIZE: "10MB"
   ENABLE_AUDIT_STDOUT: "True"
   MAX_BODY_LOG_SIZE: "2048"
+  # OpenTelemetry
+  ENABLE_OTEL: "True"
+  ENABLE_OTEL_TRACES: "True"
+  ENABLE_OTEL_METRICS: "True"
+  ENABLE_OTEL_LOGS: "True"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4317"
+  OTEL_METRICS_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4317"
+  OTEL_LOGS_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4317"
+  OTEL_EXPORTER_OTLP_INSECURE: "True"
+  OTEL_SERVICE_NAME: "openwebui"
