@@ -113,46 +113,46 @@ spec:
             - name: openwebui-storage
               mountPath: /app/backend/data
         # Container where Open WebUI's pipelines run
-        - name: openwebui-pipelines
-          image: ghcr.io/open-webui/pipelines:git-039f9c5
-          ports:
-            - containerPort: 9099
-          env:
-            - name: GLOBAL_LOG_LEVEL
-              value: DEBUG
-          #   - name: PIPELINES_API_KEY
-          #     valueFrom:
-          #       secretKeyRef:
-          #         name: openwebui-secret
-          #         key: PIPELINES_API_KEY
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 9099
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 5
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 9099
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 5
-          volumeMounts:
-            - name: pipelines-storage
-              mountPath: /app/pipelines
+        # - name: openwebui-pipelines
+        #   image: ghcr.io/open-webui/pipelines:git-039f9c5
+        #   ports:
+        #     - containerPort: 9099
+        #   env:
+        #     - name: GLOBAL_LOG_LEVEL
+        #       value: DEBUG
+        #   #   - name: PIPELINES_API_KEY
+        #   #     valueFrom:
+        #   #       secretKeyRef:
+        #   #         name: openwebui-secret
+        #   #         key: PIPELINES_API_KEY
+        #   resources:
+        #     requests:
+        #       cpu: 100m
+        #       memory: 256Mi
+        #     limits:
+        #       cpu: 500m
+        #       memory: 512Mi
+        #   livenessProbe:
+        #     httpGet:
+        #       path: /
+        #       port: 9099
+        #     initialDelaySeconds: 30
+        #     periodSeconds: 10
+        #     failureThreshold: 5
+        #   readinessProbe:
+        #     httpGet:
+        #       path: /
+        #       port: 9099
+        #     initialDelaySeconds: 30
+        #     periodSeconds: 10
+        #     failureThreshold: 5
+        #   volumeMounts:
+        #     - name: pipelines-storage
+        #       mountPath: /app/pipelines
       volumes:
         - name: openwebui-storage
           persistentVolumeClaim:
             claimName: openwebui
-        - name: pipelines-storage
-          persistentVolumeClaim:
-            claimName: openwebui-pipelines
+        # - name: pipelines-storage
+        #   persistentVolumeClaim:
+        #     claimName: openwebui-pipelines
