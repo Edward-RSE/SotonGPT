@@ -4,8 +4,7 @@ metadata:
   name: vllm-{{ .Values.model.name }}
   namespace: {{ .Values.namespace }}
 spec:
-  storageClassName: local-storage
-  volumeName: vllm-{{ .Values.model.name }}
+  storageClassName: longhorn
   accessModes:
     - ReadWriteMany
   resources:

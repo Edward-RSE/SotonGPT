@@ -23,7 +23,6 @@ spec:
         app: vllm-{{ .Values.model.name }}
         monitoring: vllm
     spec:
-      nodeName: {{ .Values.hostNode }}
       volumes:
         - name: cache
           persistentVolumeClaim:

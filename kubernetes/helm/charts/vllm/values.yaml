@@ -2,8 +2,6 @@
 # ---------------------------------------------------------------------------
 # REQUIRED — must be provided at install time, no defaults
 # ---------------------------------------------------------------------------
-# Hostname of the node
-hostNode: srv04885 
 model:
   # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
   name: ""

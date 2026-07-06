@@ -5,6 +5,5 @@ resources:
   - config-map.yaml
   - deployment.yaml
   - service.yaml
-  - pvc-openwebui.yaml
-  # - pvc-pipelines.yaml
+  - pvc.yaml
   - ingress.yaml

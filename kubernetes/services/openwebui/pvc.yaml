@@ -4,10 +4,9 @@ metadata:
   name: openwebui
   namespace: sotongpt
 spec:
-  storageClassName: local-storage
+  storageClassName: longhorn
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 32Gi
-  volumeName: openwebui
+      storage: 16Gi

@@ -6,9 +6,9 @@ metadata:
   labels:
     app: postgres
 spec:
-  storageClassName: local-storage
+  storageClassName: longhorn
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 64Gi
