@@ -7,8 +7,7 @@ model:
   name: ""
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: ""
-  # Path to the directory, on the host, where model weights will be kept
-  hostPath: ""
+
 # ---------------------------------------------------------------------------
 # OPTIONAL — sensible defaults, override only when needed
 # ---------------------------------------------------------------------------
