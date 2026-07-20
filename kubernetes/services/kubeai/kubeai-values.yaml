@@ -1,0 +1,32 @@
+resourceProfiles:
+  nvidia-gpu-rtx8000:
+    nodeSelector:
+      nvidia.com/gpu.product: "Quadro-RTX-8000"
+    limits:
+      nvidia.com/gpu: "1"
+      cpu: "8"
+      memory: "64Gi"
+    requests:
+      nvidia.com/gpu: "1"
+      cpu: "4"
+      memory: "32Gi"
+open-webui:
+  enabled: false
+modelServers:
+  VLLM:
+    images:
+      default:  "vllm/vllm-openai:v0.19.0"
+      nvidia-gpu:  "vllm/vllm-openai:v0.19.0"
+cacheProfiles:
+  longhorn:
+    sharedFilesystem:
+      storageClassName: longhorn
+      dirTemplate: /models/{model_name}/cache/
+podLabels:
+  app: kubeai
+metrics:
+  prometheusOperator:
+    vLLMPodMonitor:
+      enabled: true
+      labels:
+        release: prometheus

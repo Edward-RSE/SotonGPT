@@ -1,0 +1,17 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: llama-3.1-8b-instruct-fp16
+  namespace: sotongpt
+spec:
+  features: [TextGeneration]
+  url: hf://NousResearch/Meta-Llama-3.1-8B-Instruct
+  engine: VLLM
+  args:
+    - --max-model-len=16384
+    - --max-num-batched-token=16384
+    - --gpu-memory-utilization=0.85
+    - --dtype=float16
+  resourceProfile: nvidia-gpu-rtx8000:1
+  minReplicas: 2
+  cacheProfile: longhorn
