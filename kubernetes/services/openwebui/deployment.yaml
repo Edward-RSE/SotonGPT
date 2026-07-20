@@ -29,7 +29,7 @@ spec:
       containers:
         # Core service container, which runs Open WebUI
         - name: openwebui
-          image: ghcr.io/open-webui/open-webui:v0.9.6
+          image: ghcr.io/open-webui/open-webui:v0.10.2
           ports:
             - containerPort: 8080
           envFrom:
