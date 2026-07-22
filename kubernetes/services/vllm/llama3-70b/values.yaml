@@ -7,8 +7,6 @@ model:
   name: llama3-70b
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: casperhansen/llama-3.3-70b-instruct-awq
-  # Path to the directory, on the host, where model weights will be kept
-  hostPath: /home/ejp1v21/sotongpt-models/vllm/llama3-70b
 
 # ---------------------------------------------------------------------------
 # OPTIONAL — sensible defaults, override only when needed
@@ -19,6 +17,8 @@ numReplicas: "1"
 # Free-form vLLM CLI args — append anything the vLLM docs support.
 # The model ID is always prepended automatically, do not repeat it here
 vllmArgs:
+  - --served-model-name
+  - llama-3-3-70b
   - --tensor-parallel-size
   - "2"
   - --dtype
@@ -44,10 +44,10 @@ vllmArgs:
 resources:
   limits:
     gpu: "2"
-    cpu: "8"
-    memory: 96Gi
+    cpu: "12"
+    memory: 32Gi
   requests:
     gpu: "2"
-    cpu: "2"
-    memory: 20Gi
-  storage: 64Gi
+    cpu: "6"
+    memory: 16Gi
+  storage: 42Gi

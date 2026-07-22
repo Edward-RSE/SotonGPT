@@ -4,7 +4,7 @@
 # ---------------------------------------------------------------------------
 model:
   # Short name used to name the related pods, services and etc., e.g. "llama3-70b"
-  name: bge-reranker
+  name: bge-reranker-v2-m3
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: BAAI/bge-reranker-v2-m3
   # Path to the directory, on the host, where model weights will be kept
@@ -21,7 +21,7 @@ numReplicas: "1"
 vllmArgs:
   # Model identity
   - --served-model-name
-  - bge-reranker
+  - bge-reranker-v2-m3
   # Network
   - --host
   - 0.0.0.0
@@ -39,4 +39,4 @@ resources:
     gpu: "1"
     cpu: "4"
     memory: 4Gi
-  storage: 6Gi
+  storage: 4Gi

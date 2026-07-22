@@ -7,8 +7,6 @@ model:
   name: qwen3-32b
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: abhishekchohan/Qwen3-32B-AWQ
-  # Path to the directory, on the host, where model weights will be kept
-  hostPath: /home/ejp1v21/sotongpt-models/vllm/qwen3-32b
 
 # ---------------------------------------------------------------------------
 # OPTIONAL — sensible defaults, override only when needed
@@ -65,4 +63,4 @@ resources:
     gpu: "2"
     cpu: "6"
     memory: 16Gi
-  storage: 64Gi
+  storage: 22Gi

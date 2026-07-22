@@ -1,6 +1,5 @@
 {{- if not .Values.model.name }}{{ fail "model.name is required" }}{{ end }}
 {{- if not .Values.model.id }}{{ fail "model.id is required" }}{{ end }}
-{{- if not .Values.model.hostPath }}{{ fail "model.hostPath is required" }}{{ end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -71,4 +71,4 @@ resources:
     gpu: "2"
     cpu: "6"
     memory: 16Gi
-  storage: 64Gi
+  storage: 28Gi

@@ -45,4 +45,4 @@ resources:
     gpu: "1"
     cpu: "2"
     memory: 4Gi
-  storage: 6Gi
+  storage: 2Gi
