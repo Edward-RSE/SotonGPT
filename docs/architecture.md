@@ -104,3 +104,104 @@ vLLM may even fail to load the model.
 
 When evaluating whether a model is suitable for deployment, the question is not just "do the weights fit?" but "do the
 weights fit and leave enough room for a KV cache?"
+
+## KubeAI
+
+Not every model in SotonGPT runs as a hand-written vLLM deployment. A subset are instead managed through
+[KubeAI](https://www.kubeai.org/), a Kubernetes operator that provisions and manages vLLM (and other) inference servers
+declaratively, via a `Model` custom resource, rather than the raw `Deployment` + `PersistentVolume` + `Service` layout
+used elsewhere in `kubernetes/services/vllm`. KubeAI sits alongside the standalone vLLM deployments described above; it
+doesn't replace them.
+
+### Installation
+
+KubeAI is installed via its Helm chart:
+
+```bash
+helm repo add kubeai https://kubeai.org
+helm repo update
+
+helm upgrade --install kubeai kubeai/kubeai \
+ --wait \
+ --timeout 10m \
+ -n sotongpt \
+ -f kubeai-values.yaml \
+ --set secrets.huggingface.token=$HF_TOKEN
+```
+
+The Hugging Face token is passed in at install time via `$HF_TOKEN` (rather than committed to the values file), since
+several of the models KubeAI manages are pulled directly from the Hugging Face Hub at startup.
+
+The accompanying `kubeai-values.yaml` configures several things:
+
+- **`resourceProfiles.nvidia-gpu-rtx8000`**: defines the node selector (`nvidia.com/gpu.product: "Quadro-RTX-8000"`) and
+  the CPU, memory, and GPU requests/limits for a single RTX 8000 "unit". Each `Model` manifest references this profile
+  by name and requests a multiple of it (e.g. `nvidia-gpu-rtx8000:2` for a two-GPU, tensor-parallel model), so KubeAI
+  knows how to schedule and size the pods it creates.
+- **`open-webui.enabled: false`**: KubeAI ships with an optional Open WebUI subchart of its own. This is disabled, as
+  SotonGPT already runs its own Open WebUI deployment (see above) rather than the one bundled with KubeAI.
+- **`modelServers.VLLM.images`**: pins the vLLM image (`vllm/vllm-openai:v0.19.0`) that KubeAI uses for every model it
+  serves through the VLLM engine, keeping the version consistent across all KubeAI-managed models.
+- **`cacheProfiles.longhorn`**: configures model weight caching onto a shared Longhorn-backed filesystem
+  (`/models/{model_name}/cache/`), so weights don't need to be re-downloaded from Hugging Face every time a pod restarts
+  or is rescheduled.
+- **`metrics.prometheusOperator.vLLMPodMonitor`**: enables a `PodMonitor` so the existing Prometheus Operator release
+  scrapes vLLM metrics from KubeAI-managed pods, feeding the Grafana dashboards referenced elsewhere in this
+  documentation.
+
+### Model manifests
+
+Each KubeAI-managed model is defined by its own `Model` resource, stored under `kubernetes/services/kubeai/models`. For
+example, the Llama 3.1 8B manifest:
+
+```yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: llama-3.1-8b-instruct-fp16
+  namespace: sotongpt
+spec:
+  features: [TextGeneration]
+  url: hf://NousResearch/Meta-Llama-3.1-8B-Instruct
+  engine: VLLM
+  args:
+    - --max-model-len=16384
+    - --max-num-batched-token=16384
+    - --gpu-memory-utilization=0.85
+    - --dtype=float16
+  resourceProfile: nvidia-gpu-rtx8000:1
+  minReplicas: 2
+  cacheProfile: longhorn
+```
+
+The `args` field is passed straight through to the underlying vLLM engine, in the same way the standalone deployments
+configure vLLM directly; `resourceProfile` and `minReplicas` are what tell KubeAI how many GPUs to request per replica
+and how many replicas to keep running. `--dtype=float16` reflects the same Turing-architecture constraint described
+above: none of the KubeAI-managed models use bfloat16.
+
+Models currently deployed via KubeAI:
+
+| Model | Manifest | GPUs (tensor-parallel) | Quantisation | Context length | Min replicas | Notes |
+|---|---|---|---|---|---|---|
+| Llama 3.1 8B Instruct | `llama-3-1-instruct.yaml` | 1 | none (fp16) | 16,384 | 2 | Smallest model, single-GPU footprint |
+| Qwen3.6 35B (non-reasoning) | `qwen3-6-non-reasoning.yaml` | 2 | AWQ | 131,072 | 2 | Thinking disabled by default (`enable_thinking: false`); speculative decoding and tool calling enabled |
+| Qwen3.6 35B (reasoning) | `qwen3-6-reasoning.yaml` | 2 | AWQ | 131,072 | 4 | Same base model as above, with the `qwen3` reasoning parser enabled instead of thinking disabled; higher `minReplicas` to absorb reasoning workload |
+| Qwen3 32B (reasoning) | `qwen3-32b.yaml` | 2 | AWQ | 32,768 | 2 | Reasoning parser and tool calling enabled |
+
+A few points worth noting about these manifests:
+
+- **AWQ quantisation** is what makes it feasible to run 32B–35B parameter models on a pair of RTX 8000s at all, trading
+  a small amount of accuracy for a substantially smaller VRAM footprint compared to full-precision weights, leaving more
+  headroom for KV cache (see the VRAM discussion above).
+- **Speculative decoding** (`--speculative-config` with `qwen3_next_mtp`) is used on both Qwen3.6 35B models to improve
+  token generation speed by predicting and verifying multiple tokens per step.
+- **Chunked prefill and prefix caching** (`--enable-chunked-prefill`, `--enable-prefix-caching`) are enabled on all
+  three larger models, which particularly benefits the long-context (131k token) Qwen3.6 deployments and repeated or
+  shared-prefix conversations.
+- **Tool calling** (`--enable-auto-tool-choice`, `--tool-call-parser=qwen3_coder`) is enabled on every model except the
+  non-reasoning/reasoning distinction changes only how "thinking" is exposed, not whether tool calls are supported.
+- The **non-reasoning and reasoning Qwen3.6 variants share the same underlying weights**
+  (`hf://QuantTrio/Qwen3.6-35B-A3B-AWQ`) and are otherwise near-identical manifests; they're deployed as two separate
+  `Model` resources purely to expose thinking on/off as distinct, independently scalable endpoints in Open WebUI.
+Restarting or troubleshooting a KubeAI-managed model (including the trade-offs between deleting the whole `Model`
+resource versus deleting a single misbehaving pod) is covered in the operations runbook rather than here.
