@@ -19,7 +19,7 @@ numReplicas: "1"
 vllmArgs:
   # Model identity
   - --served-model-name
-  - qwen3-32b
+  - qwen3-32b-reasoning
   - --quantization
   - awq_marlin
   - --dtype
