@@ -67,7 +67,7 @@ data:
   OAUTH_ALLOWED_EMAIL_DOMAINS: "soton.ac.uk"
   # Only allow logins with SSO
   ENABLE_LOGIN_FORM: "False"
-  ENABLE_PASSWORD_AUTH: "False"
+  ENABLE_PASSWORD_AUTH: "True"  # have this set to true so we can create service accounts and login with them
   ENABLE_PASSWORD_CHANGE_FORM: "False"
   ENABLE_SIGNUP: "False"  # belts and braces to stop signup outside of SSO
   # These values are set to increase the security of the deployment
