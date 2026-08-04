@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openwebui-exporter-secret
+  namespace: sotongpt
+type: Opaque
+stringData:
+  OPENWEBUI_BASE_URL: "http://openwebui:8080"
+  OPENWEBUI_API_KEY: "REDACTED"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui-exporter
+  namespace: sotongpt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openwebui-exporter
+  template:
+    metadata:
+      labels:
+        app: openwebui-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: exporter
+        image: ghcr.io/baselhusam/open-webui-exporter:latest
+        ports:
+          - containerPort: 9090
+        envFrom:
+        - secretRef:
+            name: openwebui-exporter-secret
+        env:
+          - name: EXPORTER_PORT
+            value: "9090"
+          - name: COST_PER_1K_INPUT_TOKENS
+            value: "0"
+          - name: COST_PER_1K_OUTPUT_TOKENS
+            value: "0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openwebui-exporter
+  namespace: sotongpt
+  labels:
+    app: openwebui-exporter
+spec:
+  selector:
+    app: openwebui-exporter
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: openwebui-exporter
+  namespace: sotongpt
+spec:
+  selector:
+    matchLabels:
+      app: openwebui-exporter
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
