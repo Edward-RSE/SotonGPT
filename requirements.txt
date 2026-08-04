@@ -55,7 +55,7 @@ python-magic==0.4.27
 pyupgrade==3.2.2
 pyzmq==27.1.0
 redo==2.0.4
-requests==2.26.0
+requests==2.33.0
 resolvelib==0.5.4
 snowballstemmer==2.2.0
 Sphinx==4.5.0
