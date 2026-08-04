@@ -24,7 +24,7 @@ future==0.18.2
 gevent==25.9.1
 geventhttpclient==2.3.7
 greenlet==3.2.4
-idna==3.4
+idna==3.15
 imagesize==1.4.1
 importlib-metadata==5.0.0
 ipython==8.6.0
