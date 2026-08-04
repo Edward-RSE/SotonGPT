@@ -1,7 +1,7 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  name: qwen3-32b-reasoning
+  name: qwen3-32b
   namespace: sotongpt
 spec:
   features: [TextGeneration]
@@ -21,6 +21,8 @@ spec:
     - --enable-auto-tool-choice
     - --tool-call-parser=qwen3_coder
     - --reasoning-parser=qwen3
+    - --default-chat-template-kwargs
+    - '{"enable_thinking":false}'
   resourceProfile: nvidia-gpu-rtx8000:2
   minReplicas: 2
   cacheProfile: longhorn

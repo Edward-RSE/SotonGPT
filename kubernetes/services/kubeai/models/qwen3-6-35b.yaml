@@ -11,9 +11,8 @@ spec:
     - --quantization=awq_marlin
     - --dtype=float16
     - --tensor-parallel-size=2
-    - --gpu-memory-utilization=0.90
+    - --gpu-memory-utilization=0.9132
     - --kv-cache-dtype=auto
-    - --max-model-len=131072
     - --max-num-batched-tokens=32768
     - --max-num-seqs=64
     - --enable-chunked-prefill
@@ -23,6 +22,8 @@ spec:
     - --enable-auto-tool-choice
     - --tool-call-parser=qwen3_coder
     - --reasoning-parser=qwen3
+    - --default-chat-template-kwargs
+    - '{"enable_thinking":true}'
   resourceProfile: nvidia-gpu-rtx8000:2
   minReplicas: 2
   cacheProfile: longhorn
