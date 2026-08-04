@@ -45,6 +45,9 @@ spec:
           # so have to be here. Additional env variables are in the openwebui config
           # map
           env:
+            # Migrations should only be enabled on one replica
+            - name: ENABLE_DB_MIGRATIONS
+              value: "False"
             # Secret key, need to set this to coordinate replicas and muiltiple workers
             - name: WEBUI_SECRET_KEY
               valueFrom:
@@ -57,9 +60,6 @@ spec:
                 secretKeyRef:
                   name: openwebui-secret
                   key: OAUTH_CLIENT_SECRET
-            # Migrations should only be enabled on one replica
-            - name: ENABLE_DB_MIGRATIONS
-              value: "True"
             # Configure Redis connection
             - name: REDIS_PASSWORD
               valueFrom:
