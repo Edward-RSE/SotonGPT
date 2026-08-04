@@ -27,7 +27,7 @@ OpenWebUI and the vLLM containers.
 More details about the K8s architecture can be found in
 [kubernetes/README.md](https://github.com/Edward-RSE/SotonGPT/blob/main/kubernetes/README.md).
 
-## Deploying SotonGPT to K3s
+## Deploying SotonGPT
 
 To deploy SotonGPT, clone the git repository and navigate into the directory:
 
@@ -42,14 +42,8 @@ the cluster:
 kubectl apply -k kubernetes/
 ```
 
-This will create a namespace `sotongpt` and deploy the base services: Open WebUI, Postgres and Ollama. To deploy an LLM
-server, apply one of the models in the vLLM service directory:
-
-```bash
-kubectl apply -k kubernetes/vllm/qwen2_5-14b-instruct
-```
-
-You can check that the pods have been deployed and have started up correctly by using:
+This will create a namespace `sotongpt` and deploy the base services: Open WebUI, Postgres and Ollama. You can check
+that the pods have been deployed and have started up correctly by using:
 
 ```bash
 $ kubectl get pods -n sotongpt
@@ -67,33 +61,7 @@ pod -n sotongpt <pod-name>`. If the vLLM pod is stuck in pending, it's possible 
 requested resources to the pod. This usually happens when a spare GPU cannot be found on the node, of if a persistent
 volume has not been configured correctly.
 
-You can then access SotonGPT at [http://sotongpt.soton.ac.uk](http://sotongpt.soton.ac.uk).
+You can then access SotonGPT at [https://sotongpt.soton.ac.uk](https://sotongpt.soton.ac.uk).
 
-## Monitoring of vLLM and the K3s cluster
-
-To monitor the status of both the K3s cluster and the metrics of the vLLM servers, we use the kube-prometheus stack with
-a Grafana dashboard. This can be deployed using a script in monitoring directory,
-
-```bash
-cd kubernetes/monitoring && ./helm-deploy.sh
-```
-
-To enable monitoring the metrics API endpoints of the vLLM servers, we need to configure a K8s Service Monitor:
-
-```bash
-cd kubernetes/monitoring && kubectl apply -f service-monitor-vllm.yaml
-```
-
-This Service Monitor will target any service with the label `app: vllm` and create a Grafana dashboard showing metrics
-such as the token throughput and E2E latency. If there is no vLLM dashboard, you will need to import it manually using
-the [pre-made JSON template](https://grafana.com/grafana/dashboards/23991-vllm/).
-
-The dashboard has been configured to be accessible at
-[http://dashboard.sotongpt.soton.ac.uk](http://dashboard.sotongpt.soton.ac.uk).
-
-## Load testing the deployment
-
-We have provided a script using [Locust](https://locust.io/) which can be used to load test the SotonGPT deployment.
-This script will send requests to the chat completions endpoint to the available models, including sending requests to
-the file uploads endpoint and using the file in the chat completion.
-
+For documentation about deploying LLMs (e.g. using KubeAI), please see the relevant documentation in the `docs`
+directory.

@@ -7,8 +7,6 @@ model:
   name: tiny-llama
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: TinyLlama/TinyLlama-1.1B-Chat-v1.0
-  # Path to the directory, on the host, where model weights will be kept
-  hostPath: /home/ejp1v21/sotongpt-models/vllm/tiny-llama
 
 # ---------------------------------------------------------------------------
 # OPTIONAL — sensible defaults, override only when needed

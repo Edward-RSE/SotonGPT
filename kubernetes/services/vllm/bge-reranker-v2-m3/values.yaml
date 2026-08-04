@@ -7,8 +7,6 @@ model:
   name: bge-reranker-v2-m3
   # HuggingFace model ID, e.g. "Qwen3/Qwen3-32B"
   id: BAAI/bge-reranker-v2-m3
-  # Path to the directory, on the host, where model weights will be kept
-  hostPath: /home/ejp1v21/sotongpt-models/vllm/bge-reranker
 
 # ---------------------------------------------------------------------------
 # OPTIONAL — sensible defaults, override only when needed
