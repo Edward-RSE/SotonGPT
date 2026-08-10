@@ -6,7 +6,20 @@ metadata:
 type: Opaque
 stringData:
   OPENWEBUI_BASE_URL: "http://openwebui:8080"
-  OPENWEBUI_API_KEY: "REDACTED"
+  OPENWEBUI_API_KEY: "sk-bae6756aea1d40689c21d415b8b35cf9"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openwebui-exporter-model-prices
+  namespace: sotongpt
+data:
+  model_prices.csv: |
+    model,provider,input_per_1m,output_per_1m,cache_read_per_1m,cache_write_per_1m
+    qwen3-6-35b-reasoning,openai,0.1233,1.069,0.1233,1.069
+    qwen-3-6-35b-non-reasoning,openai,0.1233,1.069,0.1233,1.069
+    qwen3-32b,openai,0.1129,0.3704,0.1129,0.3704
+    llama-3-3-70b,openai,0.2822,0.5866,0.2822,0.5866
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -42,6 +55,16 @@ spec:
             value: "0"
           - name: COST_PER_1K_OUTPUT_TOKENS
             value: "0"
+          - name: MODEL_PRICES_CSV
+            value: "/etc/openwebui-exporter/model_prices.csv"
+        volumeMounts:
+          - name: model-prices
+            mountPath: /etc/openwebui-exporter
+            readOnly: true
+      volumes:
+        - name: model-prices
+          configMap:
+            name: openwebui-exporter-model-prices
 ---
 apiVersion: v1
 kind: Service
