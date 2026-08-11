@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tika
+  namespace: sotongpt
+  labels:
+    app: tika
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tika
+  template:
+    metadata:
+      labels:
+        app: tika
+    spec:
+      containers:
+        - name: tika
+          # "full" image bundles OCR (tesseract) + extra parsers, which
+          # Open WebUI's document extraction pipeline benefits from.
+          image: apache/tika:latest-full
+          ports:
+            - containerPort: 9998
+              name: http
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /tika
+              port: 9998
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /tika
+              port: 9998
+            initialDelaySeconds: 30
+            periodSeconds: 20
