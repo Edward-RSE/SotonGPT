@@ -45,7 +45,7 @@ spec:
     spec:
       containers:
         - name: exporter
-          image: ghcr.io/edward-rse/openwebui-api-exporter:latest
+          image: ghcr.io/edward-rse/openwebui-api-exporter:0.2.0
           ports:
             - containerPort: 9090
           env:
