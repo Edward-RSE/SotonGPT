@@ -24,6 +24,6 @@ spec:
     - --default-chat-template-kwargs
     - '{"enable_thinking":false}'
   resourceProfile: nvidia-gpu-rtx8000:2
-  minReplicas: 2
+  minReplicas: 1
   cacheProfile: longhorn
 

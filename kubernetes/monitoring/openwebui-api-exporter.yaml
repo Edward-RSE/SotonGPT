@@ -14,7 +14,7 @@ data:
       qwen3-6-35b-reasoning:
         prompt_per_1m: 0.1233
         completion_per_1m: 1.069
-      qwen-3-6-35b-non-reasoning:
+      qwen3-6-35b-non-reasoning:
         prompt_per_1m: 0.1233
         completion_per_1m: 1.069
       qwen3-32b:
@@ -45,20 +45,17 @@ spec:
     spec:
       containers:
         - name: exporter
-          image: ghcr.io/edward-rse/openwebui-api-exporter:0.2.0
+          image: ghcr.io/edward-rse/openwebui-api-exporter:0.2.1
           ports:
             - containerPort: 9090
           env:
+            - name: POSTGRES_DB
+              value: "openwebui_api_tracking"
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
                   name: postgres
                   key: POSTGRES_USER
-            - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: postgres
-                  key: POSTGRES_DB
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:

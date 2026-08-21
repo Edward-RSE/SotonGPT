@@ -21,7 +21,7 @@ data:
   WEBUI_SESSION_COOKIE_SAME_SITE: "lax"
   WEBUI_AUTH_COOKIE_SECURE: "True"
   # The number of separate worker processes per pod, should be <= num_cpus * num_replicas
-  UVICORN_WORKERS: "4"
+  UVICORN_WORKERS: "1"
   # Set thread pool size for AnyIO blocking calls. If too low, the web page will
   # become unresponsive. Guide value is UVICORN_WORKERS * 40, but may need to be
   # higher
@@ -52,7 +52,7 @@ data:
   DATABASE_POOL_RECYCLE: "3600"
   # Disabling features which will not be used
   ENABLE_AUTOCOMPLETE_GENERATION: "False"
-  ENABLE_FOLLOW_UP_GENERATION: "False"
+  ENABLE_FOLLOW_UP_GENERATION: "True"
   ENABLE_IMAGE_GENERATION: "False"
   ENABLE_CODE_INTERPRETER: "False"
   ENABLE_CODE_EXECUTION: "False"
@@ -75,12 +75,10 @@ data:
   ENABLE_COMMUNITY_SHARING: "False"
   ENABLE_DIRECT_CONNECTIONS: "False"
   USER_PERMISSIONS_FEATURES_API_KEYS: "True"
-  ENABLE_API_KEYS_ENDPOINT_RESTRICTIONS: "True"
-  API_KEYS_ALLOWED_ENDPOINTS: "/api/health,/api/v1/models,/v1/models,/api/chat/completions,/v1/chat/completions,/api/v1/files,/api/v1/files/{id},/api/v1/files/{id}/data/content,/api/v1/knowledge,/api/v1/knowledge/{id}"
+  ENABLE_API_KEYS_ENDPOINT_RESTRICTIONS: "False"
   ENABLE_OPENAI_API_PASSTHROUGH: "False"
   USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS: "False"
   USER_PERMISSIONS_WORKSPACE_TOOLS_IMPORT: "False"
-  USER_PERMISSIONS_WORKSPACE_SKILLS_ACCESS: "False"
   # Audit logging, useful for recording API use
   ENABLE_AUDIT_LOGS_FILE: "True"
   AUDIT_LOG_LEVEL: "METADATA"
