@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres
   namespace: sotongpt
 spec:
+  serviceName: postgres-headless
   replicas: 1
   selector:
     matchLabels:
@@ -52,7 +53,15 @@ spec:
             limits:
               cpu: 4
               memory: 8Gi
-      volumes:
-        - name: postgresdata
-          persistentVolumeClaim:
-            claimName: postgres
+  volumeClaimTemplates:
+    - metadata:
+        name: postgresdata
+        labels:
+          app: postgres
+      spec:
+        storageClassName: longhorn-retain
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 64Gi
