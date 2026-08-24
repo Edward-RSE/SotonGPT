@@ -73,21 +73,21 @@ spec:
             # Configure postgres database connection
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
-                  name: postgres
-                  key: POSTGRES_USER
+                secretKeyRef:
+                  name: postgres-cnpg-app
+                  key: username
             - name: POSTGRES_DB
               valueFrom:
-                configMapKeyRef:
-                  name: postgres
-                  key: POSTGRES_DB
+                secretKeyRef:
+                  name: postgres-cnpg-app
+                  key: dbname
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
+                  name: postgres-cnpg-app
+                  key: password
             - name: DATABASE_URL
-              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
+              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-cnpg-rw:5432/$(POSTGRES_DB)
           resources:
             requests:
               cpu: 4
