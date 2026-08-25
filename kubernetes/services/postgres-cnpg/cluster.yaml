@@ -3,6 +3,8 @@ kind: Cluster
 metadata:
   name: postgres-cnpg
   namespace: sotongpt
+  labels:
+    postgresql: openwebui
 spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
   instances: 3
@@ -21,7 +23,7 @@ spec:
           reference: ghcr.io/cloudnative-pg/pgvector:0.8.6-18-trixie
   storage:
     size: 64Gi
-    storageClass: longhorn-retain
+    storageClass: longhorn
   resources:
     requests:
       cpu: "2"
