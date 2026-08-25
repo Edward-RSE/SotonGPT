@@ -53,16 +53,16 @@ spec:
               value: "openwebui_api_tracking"
             - name: POSTGRES_USER
               valueFrom:
-                configMapKeyRef:
-                  name: postgres
-                  key: POSTGRES_USER
+                secretKeyRef:
+                  name: postgres-cnpg-app
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
+                  name: postgres-cnpg-app
+                  key: password
             - name: DATABASE_URL
-              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
+              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-cnpg-rw:5432/$(POSTGRES_DB)
             - name: POLL_INTERVAL_SECONDS
               value: "30"
             - name: POLL_BATCH_SIZE

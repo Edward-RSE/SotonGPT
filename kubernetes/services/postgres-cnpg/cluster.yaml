@@ -1,0 +1,33 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cnpg
+  namespace: sotongpt
+  labels:
+    postgresql: openwebui
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+  instances: 3
+  bootstrap:
+    initdb:
+      database: openwebui
+      owner: sotongpt
+  postgresql:
+    parameters:
+      max_connections: "256"
+      shared_buffers: "1GB"
+      work_mem: "8MB"
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.6-18-trixie
+  storage:
+    size: 64Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: "2"
+      memory: 4Gi
+    limits:
+      cpu: "4"
+      memory: 8Gi
