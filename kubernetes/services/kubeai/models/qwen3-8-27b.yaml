@@ -1,17 +1,16 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  name: qwen3-6-35b-reasoning
+  name: qwen3-8-27b
   namespace: sotongpt
 spec:
   features: [TextGeneration]
-  url: hf://QuantTrio/Qwen3.6-35B-A3B-AWQ
+  url: hf://shawnw3i/Qwen3.8-27B-AWQ-MTP
   engine: VLLM
   args:
     - --quantization=awq_marlin
     - --dtype=float16
     - --tensor-parallel-size=2
-    - --enable-expert-parallel
     - --gpu-memory-utilization=0.9132
     - --kv-cache-dtype=auto
     - --max-num-batched-tokens=32768
@@ -25,6 +24,7 @@ spec:
     - --reasoning-parser=qwen3
     - --default-chat-template-kwargs
     - '{"enable_thinking":true}'
+    - --mm-encoder-tp-mode=data
   resourceProfile: nvidia-gpu-rtx8000:2
-  minReplicas: 2
+  minReplicas: 1
   cacheProfile: longhorn
